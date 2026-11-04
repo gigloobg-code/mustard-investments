@@ -1,0 +1,221 @@
+/* ==============================================================================
+   Mustard Investments - Signature Styling & Theme
+   ============================================================================== */
+
+:root {
+  --mustard-50: #FFFBEB;
+  --mustard-100: #FEF3C7;
+  --mustard-200: #FDE68A;
+  --mustard-300: #FCD34D;
+  --mustard-400: #FBBF24;
+  --mustard-500: #F59E0B;
+  --mustard-600: #D97706;
+  --mustard-700: #B45309;
+  
+  --bg-main: #090D16;
+  --bg-surface: #0F172A;
+  --bg-card: #151E32;
+  --bg-card-hover: #1A2640;
+  --border-subtle: #1E293B;
+  --border-active: #334155;
+  
+  --gain-green: #10B981;
+  --gain-bg: rgba(16, 185, 129, 0.12);
+  --loss-red: #F43F5E;
+  --loss-bg: rgba(244, 63, 94, 0.12);
+  
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
+  color: #F1F5F9;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mustard-500);
+}
+
+/* Glassmorphism Cards */
+.mustard-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mustard-card:hover {
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.mustard-card-static {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+}
+
+/* Mustard Gradient Highlights */
+.mustard-gradient-text {
+  background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 50%, #D97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mustard-btn-primary {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%);
+  color: #0F172A;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+.mustard-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+  filter: brightness(1.08);
+}
+
+.mustard-btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Up/Down Live Tick Animation */
+@keyframes flashGreen {
+  0% { background-color: rgba(16, 185, 129, 0.35); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flashRed {
+  0% { background-color: rgba(244, 63, 94, 0.35); }
+  100% { background-color: transparent; }
+}
+
+.tick-up {
+  animation: flashGreen 1.2s ease-out;
+}
+
+.tick-down {
+  animation: flashRed 1.2s ease-out;
+}
+
+/* Pulse indicator for Live Market */
+.pulse-dot {
+  position: relative;
+}
+.pulse-dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: inherit;
+  opacity: 0.75;
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+
+/* Tab active indicator */
+.nav-tab.active {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+/* Filter pills */
+.pill-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: #94A3B8;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pill-btn:hover {
+  color: #F8FAFC;
+  border-color: var(--border-active);
+}
+
+.pill-btn.active {
+  background: rgba(245, 158, 11, 0.18);
+  color: #FBBF24;
+  border-color: #F59E0B;
+  font-weight: 600;
+}
+
+/* Badge styling */
+.badge-gain {
+  background-color: var(--gain-bg);
+  color: var(--gain-green);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.badge-loss {
+  background-color: var(--loss-bg);
+  color: var(--loss-red);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+}
+
+.badge-halal {
+  background-color: rgba(56, 189, 248, 0.12);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.badge-esg {
+  background-color: rgba(167, 139, 250, 0.12);
+  color: #C084FC;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+}
+
+/* Modal Backdrop */
+.modal-overlay {
+  background: rgba(4, 7, 13, 0.75);
+  backdrop-filter: blur(8px);
+}
+
+/* Sound / Toast Notification */
+.toast-notice {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 1px rgba(245, 158, 11, 0.5);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
