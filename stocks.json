@@ -187,7 +187,7 @@
     "marketCap": "$3.42T",
     "peRatio": 33.8,
     "dividend": "0.5%",
-    "range52": "$164.08 - "$237.23",
+    "range52": "$164.08 - $237.23",
     "tags": ["Hardware", "AI", "Consumer Tech"],
     "ethical": { "halal": true, "esgScore": "AAA", "faithAligned": true }
   },
