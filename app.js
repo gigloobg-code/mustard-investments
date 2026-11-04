@@ -902,11 +902,20 @@ function renderTopMetrics() {
   const totalReturnEl = document.getElementById('metric-total-return');
   const xpEl = document.getElementById('header-xp');
   const streakEl = document.getElementById('header-streak');
+  const heroValEl = document.getElementById('dash-hero-value');
+  const heroGainEl = document.getElementById('dash-hero-gain');
 
   if (totalEl) totalEl.textContent = app.formatMoney(totalVal);
   if (cashEl) cashEl.textContent = app.formatMoney(app.cash);
+  if (heroValEl) heroValEl.textContent = app.formatMoney(totalVal);
   if (xpEl) xpEl.textContent = `${app.xp} XP`;
   if (streakEl) streakEl.textContent = `🔥 ${app.streak} Day Streak`;
+
+  if (heroGainEl) {
+    const isPos = totalReturn.diff >= 0;
+    heroGainEl.className = isPos ? 'text-sm font-semibold text-emerald-400' : 'text-sm font-semibold text-rose-400';
+    heroGainEl.textContent = `${isPos ? '+' : ''}${app.formatMoney(totalReturn.diff)} (${isPos ? '+' : ''}${totalReturn.pct.toFixed(2)}%) All Time`;
+  }
 
   if (dayGainEl) {
     const isPos = dayGain.diff >= 0;
