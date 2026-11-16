@@ -966,24 +966,100 @@ function openAuthModal(view = 'register') {
 
 function setAuthModalView(view) {
   const isReg = view === 'register';
-  document.getElementById('authModalTitle').textContent = isReg ? 'Create Your Account' : 'Sign In to Mustard';
+  document.getElementById('authModalTitle').textContent = isReg ? 'Create Your Account' : 'Sign In to Your Account';
   document.getElementById('authSubmitBtn').textContent = isReg ? 'Create Account (£10,000 Bonus)' : 'Sign In';
   document.getElementById('authSwitchPrompt').textContent = isReg ? 'Already have an account?' : 'Need an account?';
   document.getElementById('authSwitchLink').textContent = isReg ? 'Sign In' : 'Create Account';
   document.getElementById('authSwitchLink').onclick = () => setAuthModalView(isReg ? 'login' : 'register');
-  document.getElementById('authEmailGroup').style.display = isReg ? 'block' : 'none';
+
+  const emailGroup = document.getElementById('authEmailGroup');
+  const emailInput = document.getElementById('authEmail');
+  if (emailGroup) emailGroup.style.display = isReg ? 'block' : 'none';
+  if (emailInput) emailInput.disabled = !isReg;
+
+  const usernameLabel = document.getElementById('authUsernameLabel');
+  if (usernameLabel) usernameLabel.textContent = isReg ? 'Choose Username' : 'Username or Email Address';
+
+  const bonusNotice = document.getElementById('authBonusNotice');
+  if (bonusNotice) bonusNotice.style.display = isReg ? 'block' : 'none';
+
+  const errorBox = document.getElementById('authErrorBox');
+  if (errorBox) {
+    errorBox.style.display = 'none';
+    errorBox.textContent = '';
+  }
+
   document.getElementById('authModalBackdrop').dataset.mode = view;
+  renderSavedAccountsList(isReg);
+}
+
+function renderSavedAccountsList(isReg) {
+  const container = document.getElementById('savedAccountsContainer');
+  const list = document.getElementById('savedAccountsList');
+  if (!container || !list) return;
+
+  if (isReg) {
+    container.style.display = 'none';
+    return;
+  }
+
+  const users = JSON.parse(localStorage.getItem('mustard_users') || '[]');
+  if (users.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'block';
+  list.innerHTML = users.map(u => `
+    <button type="button" class="btn btn-secondary btn-sm" onclick="selectSavedAccount('${(u.username || '').replace(/'/g, "\\'")}')" style="font-size: 0.75rem; padding: 4px 9px;">
+      👤 ${u.username} (£${formatMoney(u.cash_balance)})
+    </button>
+  `).join('');
+}
+
+function selectSavedAccount(username) {
+  const users = JSON.parse(localStorage.getItem('mustard_users') || '[]');
+  const u = users.find(x => x.username.toLowerCase() === username.toLowerCase());
+  if (u) {
+    document.getElementById('authUsername').value = u.username;
+    if (u.password) {
+      document.getElementById('authPassword').value = u.password;
+    }
+    const errorBox = document.getElementById('authErrorBox');
+    if (errorBox) errorBox.style.display = 'none';
+  }
+}
+
+function togglePasswordVisibility() {
+  const pwdInput = document.getElementById('authPassword');
+  const btn = document.getElementById('togglePwdBtn');
+  if (!pwdInput) return;
+  if (pwdInput.type === 'password') {
+    pwdInput.type = 'text';
+    if (btn) btn.textContent = '🔒 Hide';
+  } else {
+    pwdInput.type = 'password';
+    if (btn) btn.textContent = '👁️ Show';
+  }
 }
 
 async function handleAuthSubmit(e) {
   e.preventDefault();
+  const errorBox = document.getElementById('authErrorBox');
+  if (errorBox) {
+    errorBox.style.display = 'none';
+    errorBox.textContent = '';
+  }
+
   const mode = document.getElementById('authModalBackdrop').dataset.mode || 'login';
   const username = document.getElementById('authUsername').value.trim();
   const password = document.getElementById('authPassword').value.trim();
   const email = document.getElementById('authEmail').value.trim();
 
   if (!username || !password) {
-    showToast('Please fill in all required fields.', 'error');
+    const msg = 'Please enter both username and password.';
+    if (errorBox) { errorBox.textContent = msg; errorBox.style.display = 'block'; }
+    showToast(msg, 'error');
     return;
   }
 
@@ -998,8 +1074,7 @@ async function handleAuthSubmit(e) {
       });
       const data = await res.json();
       if (!res.ok) {
-        showToast(data.error || 'Authentication error', 'error');
-        return;
+        throw new Error(data.error || 'Authentication error');
       }
       state.user = data.user;
       showToast(data.message, 'success');
@@ -1013,7 +1088,12 @@ async function handleAuthSubmit(e) {
     await loadTransactions();
     renderApp();
   } catch (err) {
-    showToast(err.message || 'Authentication failed.', 'error');
+    const errorMsg = err.message || 'Authentication failed.';
+    if (errorBox) {
+      errorBox.textContent = errorMsg;
+      errorBox.style.display = 'block';
+    }
+    showToast(errorMsg, 'error');
   }
 }
 
@@ -1021,13 +1101,15 @@ function handleClientAuth(mode, username, email, password) {
   const users = JSON.parse(localStorage.getItem('mustard_users') || '[]');
 
   if (mode === 'register') {
-    if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
-      throw new Error('Username already taken.');
+    const existing = users.find(u => (u.username || '').toLowerCase() === username.toLowerCase());
+    if (existing) {
+      throw new Error(`An account named "${username}" already exists. Please sign in instead.`);
     }
+
     const newUser = {
       id: Date.now(),
       username,
-      email: email || `${username.toLowerCase()}@mustard.co.uk`,
+      email: email || `${username.toLowerCase()}@investor.local`,
       password,
       cash_balance: 10000.0,
       created_at: new Date().toISOString()
@@ -1038,10 +1120,23 @@ function handleClientAuth(mode, username, email, password) {
     state.user = newUser;
     showToast(`Account created! Welcome, ${username}. You have £10,000 ready to invest.`, 'success');
   } else {
-    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === username.toLowerCase());
-    if (!user || user.password !== password) {
-      throw new Error('Invalid username or password.');
+    // Login
+    const search = username.toLowerCase();
+    const user = users.find(u => {
+      const uName = (u.username || '').toLowerCase();
+      const uEmail = (u.email || '').toLowerCase();
+      return uName === search || (uEmail && uEmail === search);
+    });
+
+    if (!user) {
+      const available = users.map(u => u.username).filter(Boolean).join(', ');
+      throw new Error(`Account "${username}" was not found. Registered accounts on this browser: ${available || 'None'}`);
     }
+
+    if (user.password !== password) {
+      throw new Error(`Incorrect password for account "${user.username}". Click "👁️ Show" to check what you typed.`);
+    }
+
     localStorage.setItem('mustard_current_user', JSON.stringify(user));
     state.user = user;
     showToast(`Welcome back, ${user.username}!`, 'success');

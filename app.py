@@ -471,12 +471,14 @@ def register():
     email = data.get('email', '').strip().lower()
     password = data.get('password', '').strip()
 
-    if not username or len(username) < 3:
-        return jsonify({'error': 'Username must be at least 3 characters long.'}), 400
-    if not email or '@' not in email:
-        return jsonify({'error': 'A valid email address is required.'}), 400
-    if not password or len(password) < 6:
-        return jsonify({'error': 'Password must be at least 6 characters long.'}), 400
+    if not username or len(username) < 2:
+        return jsonify({'error': 'Username must be at least 2 characters long.'}), 400
+    if not password or len(password) < 3:
+        return jsonify({'error': 'Password must be at least 3 characters long.'}), 400
+
+    # Auto-generate a local email if omitted
+    if not email:
+        email = f"{username.lower()}@investor.local"
 
     pwd_hash = hash_password(password)
 
@@ -493,7 +495,7 @@ def register():
         session['user_id'] = user_id
         session['username'] = username
         return jsonify({
-            'message': 'Account created successfully! You have £10,000.00 ready to invest in stocks and crypto.',
+            'message': 'Account created successfully! You have £10,000.00 ready to invest.',
             'user': {
                 'id': user_id,
                 'username': username,
@@ -502,7 +504,7 @@ def register():
             }
         }), 201
     except sqlite3.IntegrityError:
-        return jsonify({'error': 'An account with that username or email already exists.'}), 409
+        return jsonify({'error': 'An account with that username or email already exists. Please sign in instead.'}), 409
     except Exception as e:
         return jsonify({'error': f'Failed to create account: {str(e)}'}), 500
 
@@ -518,13 +520,16 @@ def login():
     with get_db() as db:
         cursor = db.cursor()
         cursor.execute(
-            'SELECT id, username, email, password_hash, cash_balance FROM users WHERE username = ? OR email = ?',
-            (login_id, login_id.lower())
+            'SELECT id, username, email, password_hash, cash_balance FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)',
+            (login_id, login_id)
         )
         user = cursor.fetchone()
 
-    if not user or not verify_password(user['password_hash'], password):
-        return jsonify({'error': 'Invalid username/email or password.'}), 401
+    if not user:
+        return jsonify({'error': f'No account found matching "{login_id}". Please check spelling or register.'}), 404
+
+    if not verify_password(user['password_hash'], password):
+        return jsonify({'error': 'Incorrect password. Please verify your password and try again.'}), 401
 
     session['user_id'] = user['id']
     session['username'] = user['username']

@@ -322,24 +322,35 @@
         <div class="modal-title" id="authModalTitle">Create Your Account</div>
         <button class="modal-close" onclick="closeModal('authModalBackdrop')">&times;</button>
       </div>
-      <form id="authForm">
+      <form id="authForm" novalidate>
         <div class="modal-body">
-          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: var(--mustard-400);">
+          <div id="authBonusNotice" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: var(--mustard-400);">
             ✨ <strong>£10,000.00 Starting Balance:</strong> Every new private account starts with £10k in virtual capital to trade live UK equities and cryptocurrencies.
           </div>
 
+          <div id="authErrorBox" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--accent-red); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1rem; color: #fca5a5; font-size: 0.82rem; line-height: 1.4;"></div>
+
+          <!-- Saved Accounts on this Browser (Quick 1-Click Login) -->
+          <div id="savedAccountsContainer" style="display: none; margin-bottom: 1.25rem; background: var(--bg-card); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600;">Saved Accounts on this Browser:</div>
+            <div id="savedAccountsList" style="display: flex; gap: 0.4rem; flex-wrap: wrap;"></div>
+          </div>
+
           <div class="form-group">
-            <label class="form-label">Username</label>
+            <label class="form-label" id="authUsernameLabel">Username</label>
             <input type="text" id="authUsername" class="form-input" placeholder="e.g. london_trader" required autocomplete="username">
           </div>
 
           <div class="form-group" id="authEmailGroup">
-            <label class="form-label">Email Address</label>
+            <label class="form-label">Email Address <span style="color: var(--text-muted); font-size: 0.75rem;">(optional)</span></label>
             <input type="email" id="authEmail" class="form-input" placeholder="trader@example.com" autocomplete="email">
           </div>
 
           <div class="form-group">
-            <label class="form-label">Password</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <label class="form-label" style="margin-bottom: 0;">Password</label>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="togglePasswordVisibility()" style="padding: 0 4px; font-size: 0.75rem; color: var(--mustard-400);" id="togglePwdBtn">👁️ Show</button>
+            </div>
             <input type="password" id="authPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
           </div>
 
