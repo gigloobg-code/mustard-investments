@@ -917,6 +917,19 @@ def reset_portfolio():
         db.commit()
     return jsonify({'message': 'Portfolio successfully reset to initial starting capital of £10,000.00.'})
 
+@app.route('/api/auth/delete_account', methods=['POST'])
+@login_required
+def delete_account():
+    user_id = session['user_id']
+    with get_db() as db:
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM portfolios WHERE user_id = ?', (user_id,))
+        cursor.execute('DELETE FROM transactions WHERE user_id = ?', (user_id,))
+        cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        db.commit()
+    session.clear()
+    return jsonify({'message': 'Account and all trading data deleted successfully.'})
+
 # -----------------------------------------------------------------------------
 # Frontend Routes
 # -----------------------------------------------------------------------------

@@ -1011,10 +1011,46 @@ function renderSavedAccountsList(isReg) {
 
   container.style.display = 'block';
   list.innerHTML = users.map(u => `
-    <button type="button" class="btn btn-secondary btn-sm" onclick="selectSavedAccount('${(u.username || '').replace(/'/g, "\\'")}')" style="font-size: 0.75rem; padding: 4px 9px;">
-      👤 ${u.username} (£${formatMoney(u.cash_balance)})
-    </button>
+    <div style="display: inline-flex; align-items: center; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-color); overflow: hidden;">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="selectSavedAccount('${(u.username || '').replace(/'/g, "\\'")}')" style="font-size: 0.75rem; padding: 4px 9px; border: none; background: transparent;">
+        👤 ${u.username} (£${formatMoney(u.cash_balance)})
+      </button>
+      <button type="button" onclick="deleteSavedAccount(event, '${(u.username || '').replace(/'/g, "\\'")}')" title="Delete account from this browser" style="background: transparent; border: none; color: var(--accent-red); cursor: pointer; padding: 4px 8px; font-size: 0.9rem; font-weight: bold; line-height: 1;">
+        &times;
+      </button>
+    </div>
   `).join('');
+}
+
+function deleteSavedAccount(e, username) {
+  if (e) e.stopPropagation();
+  if (!confirm(`Are you sure you want to delete the account "${username}" from this browser?`)) {
+    return;
+  }
+  let users = JSON.parse(localStorage.getItem('mustard_users') || '[]');
+  const target = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+  users = users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
+  localStorage.setItem('mustard_users', JSON.stringify(users));
+
+  if (target) {
+    const portfolios = JSON.parse(localStorage.getItem('mustard_portfolios') || '{}');
+    delete portfolios[target.id];
+    localStorage.setItem('mustard_portfolios', JSON.stringify(portfolios));
+
+    const transactions = JSON.parse(localStorage.getItem('mustard_transactions') || '{}');
+    delete transactions[target.id];
+    localStorage.setItem('mustard_transactions', JSON.stringify(transactions));
+  }
+
+  const currentUser = JSON.parse(localStorage.getItem('mustard_current_user') || 'null');
+  if (currentUser && currentUser.username.toLowerCase() === username.toLowerCase()) {
+    localStorage.removeItem('mustard_current_user');
+    state.user = null;
+    updateAuthUI();
+  }
+
+  renderSavedAccountsList(false);
+  showToast(`Account "${username}" was deleted.`, 'info');
 }
 
 function selectSavedAccount(username) {
@@ -1206,6 +1242,46 @@ async function resetAccount() {
 
   await loadPortfolio();
   await loadTransactions();
+  renderApp();
+}
+
+async function deleteCurrentAccount() {
+  if (!confirm('Warning: Are you sure you want to permanently delete your account and all trading history? This cannot be undone.')) {
+    return;
+  }
+
+  if (!state.isClientMode) {
+    const res = await fetch('/api/auth/delete_account', { method: 'POST' });
+    const data = await res.json();
+    showToast(data.message, 'info');
+  } else {
+    let users = JSON.parse(localStorage.getItem('mustard_users') || '[]');
+    users = users.filter(u => u.id !== state.user.id);
+    localStorage.setItem('mustard_users', JSON.stringify(users));
+
+    const portfolios = JSON.parse(localStorage.getItem('mustard_portfolios') || '{}');
+    delete portfolios[state.user.id];
+    localStorage.setItem('mustard_portfolios', JSON.stringify(portfolios));
+
+    const transactions = JSON.parse(localStorage.getItem('mustard_transactions') || '{}');
+    delete transactions[state.user.id];
+    localStorage.setItem('mustard_transactions', JSON.stringify(transactions));
+
+    localStorage.removeItem('mustard_current_user');
+    showToast('Your account was permanently deleted.', 'info');
+  }
+
+  state.user = null;
+  state.portfolio = {
+    cash_balance: 10000.0,
+    holdings_value: 0.0,
+    total_portfolio_value: 10000.0,
+    overall_pnl: 0.0,
+    overall_pnl_pct: 0.0,
+    holdings: []
+  };
+  state.transactions = [];
+  updateAuthUI();
   renderApp();
 }
 
