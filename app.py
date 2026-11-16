@@ -251,7 +251,7 @@ def get_db():
     return conn
 
 def init_db():
-    with get_db() as db:
+    with sqlite3.connect(DB_PATH) as db:
         db.executescript('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -289,6 +289,9 @@ def init_db():
         );
         ''')
         db.commit()
+
+# Ensure database tables exist immediately on server launch or import
+init_db()
 
 # Password Security
 def hash_password(password: str, salt: str = None) -> str:
