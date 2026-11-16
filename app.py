@@ -18,13 +18,15 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # -----------------------------------------------------------------------------
-# UK FTSE 100 Stock Master List
+# Asset Universe: UK FTSE 100 Equities & Leading Cryptocurrencies
 # -----------------------------------------------------------------------------
-UK_STOCKS = [
+MARKET_ASSETS = [
+    # Top UK FTSE 100 Stocks
     {
         'symbol': 'AZN.L',
         'name': 'AstraZeneca PLC',
         'sector': 'Healthcare',
+        'asset_type': 'STOCK',
         'description': 'Global biopharmaceutical company specializing in oncology, rare diseases, and vaccines.',
         'base_price': 140.50
     },
@@ -32,6 +34,7 @@ UK_STOCKS = [
         'symbol': 'SHEL.L',
         'name': 'Shell PLC',
         'sector': 'Energy',
+        'asset_type': 'STOCK',
         'description': 'Multinational oil and gas supermajor with growing investments in renewable energy.',
         'base_price': 37.50
     },
@@ -39,6 +42,7 @@ UK_STOCKS = [
         'symbol': 'HSBA.L',
         'name': 'HSBC Holdings PLC',
         'sector': 'Financials',
+        'asset_type': 'STOCK',
         'description': 'One of the worlds largest banking and financial services organizations.',
         'base_price': 13.60
     },
@@ -46,6 +50,7 @@ UK_STOCKS = [
         'symbol': 'ULVR.L',
         'name': 'Unilever PLC',
         'sector': 'Consumer Goods',
+        'asset_type': 'STOCK',
         'description': 'Consumer goods giant owning Dove, Ben & Jerrys, Knorr, and Hellmanns.',
         'base_price': 50.20
     },
@@ -53,6 +58,7 @@ UK_STOCKS = [
         'symbol': 'BP.L',
         'name': 'BP PLC',
         'sector': 'Energy',
+        'asset_type': 'STOCK',
         'description': 'Integrated energy company operating across exploration, refining, and biofuels.',
         'base_price': 5.75
     },
@@ -60,6 +66,7 @@ UK_STOCKS = [
         'symbol': 'RR.L',
         'name': 'Rolls-Royce Holdings PLC',
         'sector': 'Aerospace & Defence',
+        'asset_type': 'STOCK',
         'description': 'Pioneering power and propulsion systems for civil aerospace and defence.',
         'base_price': 13.65
     },
@@ -67,6 +74,7 @@ UK_STOCKS = [
         'symbol': 'GSK.L',
         'name': 'GSK PLC',
         'sector': 'Healthcare',
+        'asset_type': 'STOCK',
         'description': 'Global biopharma company focused on vaccines, HIV, and immunology treatments.',
         'base_price': 19.30
     },
@@ -74,6 +82,7 @@ UK_STOCKS = [
         'symbol': 'BA.L',
         'name': 'BAE Systems PLC',
         'sector': 'Aerospace & Defence',
+        'asset_type': 'STOCK',
         'description': 'Leading British multinational defence, aerospace and security company.',
         'base_price': 19.30
     },
@@ -81,6 +90,7 @@ UK_STOCKS = [
         'symbol': 'BARC.L',
         'name': 'Barclays PLC',
         'sector': 'Financials',
+        'asset_type': 'STOCK',
         'description': 'Major British universal bank operating in consumer banking and global investment banking.',
         'base_price': 4.30
     },
@@ -88,6 +98,7 @@ UK_STOCKS = [
         'symbol': 'TSCO.L',
         'name': 'Tesco PLC',
         'sector': 'Consumer Goods',
+        'asset_type': 'STOCK',
         'description': 'The UKs largest grocery and merchandise retailer with thousands of stores.',
         'base_price': 5.65
     },
@@ -95,6 +106,7 @@ UK_STOCKS = [
         'symbol': 'RIO.L',
         'name': 'Rio Tinto PLC',
         'sector': 'Basic Materials',
+        'asset_type': 'STOCK',
         'description': 'Anglo-Australian mining giant producing iron ore, aluminium, and copper.',
         'base_price': 62.20
     },
@@ -102,6 +114,7 @@ UK_STOCKS = [
         'symbol': 'GLEN.L',
         'name': 'Glencore PLC',
         'sector': 'Basic Materials',
+        'asset_type': 'STOCK',
         'description': 'Diversified natural resource company and commodity trading powerhouse.',
         'base_price': 5.05
     },
@@ -109,6 +122,7 @@ UK_STOCKS = [
         'symbol': 'LSEG.L',
         'name': 'London Stock Exchange Group',
         'sector': 'Financials',
+        'asset_type': 'STOCK',
         'description': 'Global financial markets infrastructure and data provider.',
         'base_price': 98.20
     },
@@ -116,6 +130,7 @@ UK_STOCKS = [
         'symbol': 'NWG.L',
         'name': 'NatWest Group PLC',
         'sector': 'Financials',
+        'asset_type': 'STOCK',
         'description': 'Major UK retail and commercial bank serving millions of personal and business customers.',
         'base_price': 6.00
     },
@@ -123,6 +138,7 @@ UK_STOCKS = [
         'symbol': 'LLOY.L',
         'name': 'Lloyds Banking Group PLC',
         'sector': 'Financials',
+        'asset_type': 'STOCK',
         'description': 'Britains largest domestic retail bank including Halifax and Bank of Scotland.',
         'base_price': 1.00
     },
@@ -130,6 +146,7 @@ UK_STOCKS = [
         'symbol': 'VOD.L',
         'name': 'Vodafone Group PLC',
         'sector': 'Telecommunications',
+        'asset_type': 'STOCK',
         'description': 'Pan-European and African telecommunications company providing 5G and mobile services.',
         'base_price': 1.20
     },
@@ -137,6 +154,7 @@ UK_STOCKS = [
         'symbol': 'DGE.L',
         'name': 'Diageo PLC',
         'sector': 'Consumer Goods',
+        'asset_type': 'STOCK',
         'description': 'World leader in premium alcoholic beverages, including Guinness, Smirnoff, and Johnnie Walker.',
         'base_price': 19.35
     },
@@ -144,8 +162,75 @@ UK_STOCKS = [
         'symbol': 'NG.L',
         'name': 'National Grid PLC',
         'sector': 'Utilities',
+        'asset_type': 'STOCK',
         'description': 'Electricity and gas transmission utility operating across the UK and northeastern US.',
         'base_price': 12.80
+    },
+
+    # Leading Cryptocurrencies (Quoted in GBP)
+    {
+        'symbol': 'BTC-GBP',
+        'name': 'Bitcoin',
+        'sector': 'Crypto',
+        'asset_type': 'CRYPTO',
+        'description': 'The premier decentralized digital currency and global cryptographic store of value.',
+        'base_price': 48800.0
+    },
+    {
+        'symbol': 'ETH-GBP',
+        'name': 'Ethereum',
+        'sector': 'Crypto',
+        'asset_type': 'CRYPTO',
+        'description': 'Decentralized global computing platform powering smart contracts, web3, and DeFi.',
+        'base_price': 1370.0
+    },
+    {
+        'symbol': 'SOL-GBP',
+        'name': 'Solana',
+        'sector': 'Crypto',
+        'asset_type': 'CRYPTO',
+        'description': 'High-throughput layer-1 blockchain engineered for ultra-fast, low-cost decentralized applications.',
+        'base_price': 54.0
+    },
+    {
+        'symbol': 'XRP-GBP',
+        'name': 'XRP',
+        'sector': 'Crypto',
+        'asset_type': 'CRYPTO',
+        'description': 'Digital asset built for instant, borderless financial settlement and liquidity.',
+        'base_price': 0.72
+    },
+    {
+        'symbol': 'BNB-GBP',
+        'name': 'BNB',
+        'sector': 'Crypto',
+        'asset_type': 'CRYPTO',
+        'description': 'Utility and ecosystem coin powering the BNB Chain and decentralized applications.',
+        'base_price': 450.0
+    },
+    {
+        'symbol': 'DOGE-GBP',
+        'name': 'Dogecoin',
+        'sector': 'Crypto',
+        'asset_type': 'CRYPTO',
+        'description': 'Popular peer-to-peer digital currency with widespread community support and instant transfers.',
+        'base_price': 0.12
+    },
+    {
+        'symbol': 'ADA-GBP',
+        'name': 'Cardano',
+        'sector': 'Crypto',
+        'asset_type': 'CRYPTO',
+        'description': 'Proof-of-stake blockchain network focused on security, sustainability, and peer-reviewed research.',
+        'base_price': 0.45
+    },
+    {
+        'symbol': 'AVAX-GBP',
+        'name': 'Avalanche',
+        'sector': 'Crypto',
+        'asset_type': 'CRYPTO',
+        'description': 'Smart contracts platform built for high transaction finality, security, and enterprise subnets.',
+        'base_price': 22.0
     }
 ]
 
@@ -230,7 +315,7 @@ def login_required(f):
     return decorated_function
 
 # -----------------------------------------------------------------------------
-# UK Live Stock Quotes Service
+# Market Quotes Service (Equities & Crypto)
 # -----------------------------------------------------------------------------
 def get_yahoo_session_and_crumb():
     import requests
@@ -253,13 +338,13 @@ def get_yahoo_session_and_crumb():
 
 def fetch_live_quotes():
     now = time.time()
-    # Cache for 6 seconds to be snappy yet avoid rate limits
-    if now - QUOTE_CACHE['last_updated'] < 6 and QUOTE_CACHE['data']:
+    # Cache for 5 seconds to provide rapid real-time updates while avoiding rate limits
+    if now - QUOTE_CACHE['last_updated'] < 5 and QUOTE_CACHE['data']:
         return QUOTE_CACHE['data']
 
     import requests
 
-    symbols = [s['symbol'] for s in UK_STOCKS]
+    symbols = [s['symbol'] for s in MARKET_ASSETS]
     fetched_quotes = {}
 
     try:
@@ -278,18 +363,34 @@ def fetch_live_quotes():
                 data = res.json().get('quoteResponse', {}).get('result', [])
                 for item in data:
                     sym = item.get('symbol')
-                    curr = item.get('currency', 'GBp')
+                    curr = item.get('currency', 'GBP')
                     raw_p = item.get('regularMarketPrice')
                     if raw_p is None:
                         continue
-                    # Convert London Stock Exchange pence (GBp) to Pounds (£)
-                    price_gbp = round(raw_p / 100.0, 2) if curr == 'GBp' else round(raw_p, 2)
-                    change = item.get('regularMarketChange', 0)
+
+                    # London Stock Exchange equities are quoted in pence (GBp) -> convert to Pounds (£)
+                    # Crypto pairs like BTC-GBP are already in GBP -> retain pounds directly
+                    if curr == 'GBp':
+                        price_gbp = round(raw_p / 100.0, 2)
+                    elif raw_p < 1.0:
+                        price_gbp = round(raw_p, 4)
+                    else:
+                        price_gbp = round(raw_p, 2)
+
                     chg_pct = round(item.get('regularMarketChangePercent', 0), 2)
                     high = item.get('regularMarketDayHigh', raw_p)
                     low = item.get('regularMarketDayLow', raw_p)
-                    high_gbp = round(high / 100.0, 2) if curr == 'GBp' else round(high, 2)
-                    low_gbp = round(low / 100.0, 2) if curr == 'GBp' else round(low, 2)
+
+                    if curr == 'GBp':
+                        high_gbp = round(high / 100.0, 2)
+                        low_gbp = round(low / 100.0, 2)
+                    elif raw_p < 1.0:
+                        high_gbp = round(high, 4)
+                        low_gbp = round(low, 4)
+                    else:
+                        high_gbp = round(high, 2)
+                        low_gbp = round(low, 2)
+
                     volume = item.get('regularMarketVolume', 0)
 
                     fetched_quotes[sym] = {
@@ -298,14 +399,14 @@ def fetch_live_quotes():
                         'day_high': high_gbp,
                         'day_low': low_gbp,
                         'volume': volume,
-                        'source': 'LSE Live'
+                        'source': 'Live Feed'
                     }
     except Exception as e:
         print(f"Quote fetch error: {e}")
 
     # Build final list merging master list with fetched live quotes or realistic simulated movement
     result = []
-    for s_info in UK_STOCKS:
+    for s_info in MARKET_ASSETS:
         sym = s_info['symbol']
         q = fetched_quotes.get(sym)
         
@@ -317,31 +418,33 @@ def fetch_live_quotes():
             vol = q['volume']
             src = q['source']
         else:
-            # Fallback to simulated subtle micro-movements around base_price
+            # Fallback realistic micro-movement
             prev_price = QUOTE_CACHE['data'].get(sym, {}).get('price', s_info['base_price'])
-            drift = (random.random() - 0.495) * 0.003
-            price = round(max(0.10, prev_price * (1 + drift)), 2)
+            drift = (random.random() - 0.495) * 0.004
+            raw_calc = max(0.01, prev_price * (1 + drift))
+            price = round(raw_calc, 4) if raw_calc < 1.0 else round(raw_calc, 2)
             chg_pct = round(((price - s_info['base_price']) / s_info['base_price']) * 100, 2)
-            high = round(max(price, s_info['base_price'] * 1.015), 2)
-            low = round(min(price, s_info['base_price'] * 0.985), 2)
-            vol = random.randint(1500000, 8500000)
+            high = round(max(price, s_info['base_price'] * 1.02), 4 if price < 1.0 else 2)
+            low = round(min(price, s_info['base_price'] * 0.98), 4 if price < 1.0 else 2)
+            vol = random.randint(1500000, 9500000)
             src = 'Live Simulation'
 
         # Generate sparkline 10-point intraday history
         spark = []
-        cur = round(price * (1.0 - (chg_pct / 100.0)), 2)
+        cur = price * (1.0 - (chg_pct / 100.0))
         steps = 10
         step_delta = (price - cur) / steps
         for i in range(steps):
-            noise = (random.random() - 0.5) * (price * 0.005)
-            pt = round(cur + (step_delta * i) + noise, 2)
-            spark.append(max(0.01, pt))
+            noise = (random.random() - 0.5) * (price * 0.008)
+            pt = max(0.0001, cur + (step_delta * i) + noise)
+            spark.append(round(pt, 4 if price < 1.0 else 2))
         spark.append(price)
 
-        stock_record = {
+        record = {
             'symbol': sym,
             'name': s_info['name'],
             'sector': s_info['sector'],
+            'asset_type': s_info['asset_type'],
             'description': s_info['description'],
             'price': price,
             'change_pct': chg_pct,
@@ -351,8 +454,8 @@ def fetch_live_quotes():
             'source': src,
             'sparkline': spark
         }
-        result.append(stock_record)
-        fetched_quotes[sym] = stock_record
+        result.append(record)
+        fetched_quotes[sym] = record
 
     QUOTE_CACHE['last_updated'] = now
     QUOTE_CACHE['data'] = {s['symbol']: s for s in result}
@@ -390,7 +493,7 @@ def register():
         session['user_id'] = user_id
         session['username'] = username
         return jsonify({
-            'message': 'Account created successfully! You have £10,000.00 ready to invest.',
+            'message': 'Account created successfully! You have £10,000.00 ready to invest in stocks and crypto.',
             'user': {
                 'id': user_id,
                 'username': username,
@@ -468,30 +571,30 @@ def get_current_user():
     })
 
 # -----------------------------------------------------------------------------
-# Stock Market Endpoints
+# Asset Market Endpoints
 # -----------------------------------------------------------------------------
 @app.route('/api/stocks', methods=['GET'])
 def list_stocks():
     quotes = fetch_live_quotes()
-    stock_list = list(quotes.values())
-    stock_list.sort(key=lambda x: x['name'])
+    asset_list = list(quotes.values())
+    asset_list.sort(key=lambda x: (x.get('asset_type') != 'STOCK', x['name']))
     return jsonify({
-        'stocks': stock_list,
+        'stocks': asset_list,
         'timestamp': datetime.now(timezone.utc).isoformat(),
-        'count': len(stock_list)
+        'count': len(asset_list)
     })
 
 @app.route('/api/stocks/<symbol>', methods=['GET'])
 def get_stock_detail(symbol):
     symbol = symbol.upper()
     quotes = fetch_live_quotes()
-    stock = quotes.get(symbol)
-    if not stock:
-        return jsonify({'error': f'Stock symbol {symbol} not found.'}), 404
-    return jsonify({'stock': stock})
+    asset = quotes.get(symbol)
+    if not asset:
+        return jsonify({'error': f'Asset symbol {symbol} not found.'}), 404
+    return jsonify({'stock': asset})
 
 # -----------------------------------------------------------------------------
-# Trading & Portfolio Endpoints
+# Trading & Portfolio Endpoints (Fractional Shares & Crypto)
 # -----------------------------------------------------------------------------
 @app.route('/api/portfolio', methods=['GET'])
 @login_required
@@ -506,7 +609,7 @@ def get_portfolio():
         cash = round(user_row['cash_balance'], 2)
 
         cursor.execute(
-            'SELECT symbol, shares, average_buy_price, total_invested FROM portfolios WHERE user_id = ? AND shares > 0',
+            'SELECT symbol, shares, average_buy_price, total_invested FROM portfolios WHERE user_id = ? AND shares > 0.0000001',
             (user_id,)
         )
         portfolio_rows = cursor.fetchall()
@@ -521,9 +624,10 @@ def get_portfolio():
         avg_buy = row['average_buy_price']
         cost = row['total_invested']
 
-        stock_info = quotes.get(sym, {})
-        current_price = stock_info.get('price', avg_buy)
-        name = stock_info.get('name', sym)
+        asset_info = quotes.get(sym, {})
+        current_price = asset_info.get('price', avg_buy)
+        name = asset_info.get('name', sym)
+        asset_type = asset_info.get('asset_type', 'STOCK')
 
         current_value = round(shares * current_price, 2)
         pnl = round(current_value - cost, 2)
@@ -532,11 +636,15 @@ def get_portfolio():
         total_holdings_value += current_value
         total_cost_basis += cost
 
+        # Round shares nicely: up to 6 decimals for fractional crypto, up to 4 for stocks
+        shares_rounded = round(shares, 6) if asset_type == 'CRYPTO' else round(shares, 4)
+
         holdings.append({
             'symbol': sym,
             'name': name,
-            'shares': round(shares, 4),
-            'average_buy_price': round(avg_buy, 2),
+            'asset_type': asset_type,
+            'shares': shares_rounded,
+            'average_buy_price': round(avg_buy, 4 if avg_buy < 1.0 else 2),
             'current_price': current_price,
             'total_invested': round(cost, 2),
             'current_value': current_value,
@@ -566,18 +674,21 @@ def buy_stock():
     try:
         shares = float(data.get('shares', 0))
     except (ValueError, TypeError):
-        return jsonify({'error': 'Invalid number of shares.'}), 400
+        return jsonify({'error': 'Invalid quantity.'}), 400
 
     if shares <= 0:
-        return jsonify({'error': 'Shares to buy must be greater than zero.'}), 400
+        return jsonify({'error': 'Quantity to buy must be greater than zero.'}), 400
 
     quotes = fetch_live_quotes()
-    stock = quotes.get(symbol)
-    if not stock:
-        return jsonify({'error': f'Stock symbol {symbol} not recognized.'}), 404
+    asset = quotes.get(symbol)
+    if not asset:
+        return jsonify({'error': f'Asset symbol {symbol} not recognized.'}), 404
 
-    price = stock['price']
+    price = asset['price']
     total_cost = round(shares * price, 2)
+
+    if total_cost < 0.01:
+        return jsonify({'error': 'Minimum transaction amount is £0.01.'}), 400
 
     with get_db() as db:
         cursor = db.cursor()
@@ -604,7 +715,7 @@ def buy_stock():
             prev_cost = existing['total_invested']
             new_shares = prev_shares + shares
             new_cost = round(prev_cost + total_cost, 2)
-            new_avg = round(new_cost / new_shares, 2)
+            new_avg = round(new_cost / new_shares, 6)
             cursor.execute(
                 'UPDATE portfolios SET shares = ?, average_buy_price = ?, total_invested = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND symbol = ?',
                 (new_shares, new_avg, new_cost, user_id, symbol)
@@ -623,15 +734,16 @@ def buy_stock():
             '''INSERT INTO transactions 
                (user_id, symbol, stock_name, type, shares, price_per_share, total_amount, realized_pnl)
                VALUES (?, ?, ?, 'BUY', ?, ?, ?, 0.0)''',
-            (user_id, symbol, stock['name'], shares, price, total_cost)
+            (user_id, symbol, asset['name'], shares, price, total_cost)
         )
         db.commit()
 
+    unit_label = 'units' if asset.get('asset_type') == 'CRYPTO' else 'shares'
     return jsonify({
-        'message': f'Successfully bought {shares:g} shares of {symbol} at £{price:,.2f} for £{total_cost:,.2f}.',
+        'message': f'Successfully bought {shares:g} {unit_label} of {symbol} at £{price:,.2f} for £{total_cost:,.2f}.',
         'trade': {
             'symbol': symbol,
-            'name': stock['name'],
+            'name': asset['name'],
             'type': 'BUY',
             'shares': shares,
             'price': price,
@@ -649,17 +761,17 @@ def sell_stock():
     try:
         shares = float(data.get('shares', 0))
     except (ValueError, TypeError):
-        return jsonify({'error': 'Invalid number of shares.'}), 400
+        return jsonify({'error': 'Invalid quantity.'}), 400
 
     if shares <= 0:
-        return jsonify({'error': 'Shares to sell must be greater than zero.'}), 400
+        return jsonify({'error': 'Quantity to sell must be greater than zero.'}), 400
 
     quotes = fetch_live_quotes()
-    stock = quotes.get(symbol)
-    if not stock:
-        return jsonify({'error': f'Stock symbol {symbol} not recognized.'}), 404
+    asset = quotes.get(symbol)
+    if not asset:
+        return jsonify({'error': f'Asset symbol {symbol} not recognized.'}), 404
 
-    price = stock['price']
+    price = asset['price']
 
     with get_db() as db:
         cursor = db.cursor()
@@ -669,10 +781,10 @@ def sell_stock():
         )
         holding = cursor.fetchone()
 
-        if not holding or holding['shares'] < shares - 1e-6:
+        if not holding or holding['shares'] < shares - 1e-7:
             owned = holding['shares'] if holding else 0.0
             return jsonify({
-                'error': f'You only own {owned:g} shares of {symbol}. Cannot sell {shares:g} shares.'
+                'error': f'You only own {owned:g} of {symbol}. Cannot sell {shares:g}.'
             }), 400
 
         owned_shares = holding['shares']
@@ -688,8 +800,8 @@ def sell_stock():
         cursor.execute('UPDATE users SET cash_balance = ? WHERE id = ?', (new_cash, user_id))
 
         # Update or delete holding
-        remaining_shares = round(owned_shares - shares, 6)
-        if remaining_shares <= 0.0001:
+        remaining_shares = round(owned_shares - shares, 8)
+        if remaining_shares <= 0.0000001:
             cursor.execute('DELETE FROM portfolios WHERE user_id = ? AND symbol = ?', (user_id, symbol))
         else:
             remaining_cost = round(remaining_shares * avg_buy_price, 2)
@@ -703,15 +815,16 @@ def sell_stock():
             '''INSERT INTO transactions 
                (user_id, symbol, stock_name, type, shares, price_per_share, total_amount, realized_pnl)
                VALUES (?, ?, ?, 'SELL', ?, ?, ?, ?)''',
-            (user_id, symbol, stock['name'], shares, price, total_proceeds, realized_pnl)
+            (user_id, symbol, asset['name'], shares, price, total_proceeds, realized_pnl)
         )
         db.commit()
 
+    unit_label = 'units' if asset.get('asset_type') == 'CRYPTO' else 'shares'
     return jsonify({
-        'message': f'Sold {shares:g} shares of {symbol} at £{price:,.2f} for £{total_proceeds:,.2f} (P&L: {"+" if realized_pnl>=0 else ""}{realized_pnl:,.2f}).',
+        'message': f'Sold {shares:g} {unit_label} of {symbol} at £{price:,.2f} for £{total_proceeds:,.2f} (P&L: {"+" if realized_pnl>=0 else ""}{realized_pnl:,.2f}).',
         'trade': {
             'symbol': symbol,
-            'name': stock['name'],
+            'name': asset['name'],
             'type': 'SELL',
             'shares': shares,
             'price': price,
@@ -741,8 +854,8 @@ def get_transactions():
             'symbol': r['symbol'],
             'stock_name': r['stock_name'],
             'type': r['type'],
-            'shares': round(r['shares'], 4),
-            'price_per_share': round(r['price_per_share'], 2),
+            'shares': round(r['shares'], 6),
+            'price_per_share': round(r['price_per_share'], 4 if r['price_per_share'] < 1.0 else 2),
             'total_amount': round(r['total_amount'], 2),
             'realized_pnl': round(r['realized_pnl'], 2),
             'created_at': r['created_at']
@@ -762,7 +875,7 @@ def get_leaderboard():
         for u in users:
             uid = u['id']
             cash = u['cash_balance']
-            cursor.execute('SELECT symbol, shares FROM portfolios WHERE user_id = ? AND shares > 0', (uid,))
+            cursor.execute('SELECT symbol, shares FROM portfolios WHERE user_id = ? AND shares > 0.0000001', (uid,))
             holdings = cursor.fetchall()
             stock_val = sum(h['shares'] * quotes.get(h['symbol'], {}).get('price', 0.0) for h in holdings)
             total_val = round(cash + stock_val, 2)

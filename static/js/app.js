@@ -1,6 +1,6 @@
 /**
  * Mustard Investments UK - Interactive Frontend Engine
- * Supports both Flask Backend API and GitHub Pages Client Mode.
+ * Supports UK FTSE 100 Stocks, Cryptocurrencies, Flask Backend API, and GitHub Pages Client Mode.
  */
 
 // Global State
@@ -23,6 +23,7 @@ const state = {
   searchQuery: '',
   activeStock: null,
   tradeMode: 'BUY',
+  tradeInputMode: 'UNITS', // 'UNITS' or 'CASH'
   isClientMode: false,
   prevPrices: {}
 };
@@ -89,7 +90,6 @@ function initClock() {
 // -----------------------------------------------------------------------------
 function setupClientMode() {
   state.isClientMode = true;
-  // Initialize local demo storage
   if (!localStorage.getItem('mustard_users')) {
     const defaultUser = {
       id: 1,
@@ -128,8 +128,7 @@ async function loadStocks(fullRender = true) {
     }
 
     if (!stocks || stocks.length === 0) {
-      // In Client mode or offline fallback, generate or update simulated live UK stocks
-      stocks = getSimulatedUKStocks();
+      stocks = getSimulatedMarketAssets();
     }
 
     // Detect price movements for flash animations
@@ -173,17 +172,18 @@ async function loadPortfolio(fullRender = true) {
 
       let holdingsVal = 0.0;
       const enrichedHoldings = userHoldings.map(h => {
-        const stock = state.stocksMap[h.symbol] || { price: h.average_buy_price, name: h.symbol };
-        const curVal = round(h.shares * stock.price);
+        const asset = state.stocksMap[h.symbol] || { price: h.average_buy_price, name: h.symbol, asset_type: 'STOCK' };
+        const curVal = round(h.shares * asset.price);
         const pnl = round(curVal - h.total_invested);
         const pnl_pct = h.total_invested > 0 ? round((pnl / h.total_invested) * 100) : 0;
         holdingsVal += curVal;
         return {
           symbol: h.symbol,
-          name: stock.name,
+          name: asset.name,
+          asset_type: asset.asset_type || (h.symbol.includes('-GBP') ? 'CRYPTO' : 'STOCK'),
           shares: h.shares,
           average_buy_price: h.average_buy_price,
-          current_price: stock.price,
+          current_price: asset.price,
           total_invested: h.total_invested,
           current_value: curVal,
           pnl: pnl,
@@ -288,16 +288,16 @@ function renderTickerTape() {
   const html = state.stocks.map(s => {
     const isUp = s.change_pct >= 0;
     const sign = isUp ? '+' : '';
+    const icon = s.asset_type === 'CRYPTO' ? '🪙' : '🇬🇧';
     return `
       <div class="ticker-item" onclick="openTradeModal('${s.symbol}', 'BUY')">
-        <span class="ticker-sym">${s.symbol}</span>
-        <span class="ticker-price">£${s.price.toFixed(2)}</span>
+        <span class="ticker-sym">${icon} ${s.symbol}</span>
+        <span class="ticker-price">£${formatPrice(s.price)}</span>
         <span class="${isUp ? 'up' : 'down'}">${sign}${s.change_pct.toFixed(2)}%</span>
       </div>
     `;
   }).join('');
 
-  // Duplicate for seamless infinite marquee loop
   track.innerHTML = html + html;
 }
 
@@ -333,11 +333,24 @@ function renderStocksTable() {
   const tbody = document.getElementById('stocksTableBody');
   if (!tbody) return;
 
+  const countBadge = document.getElementById('tabCountStocks');
+  if (countBadge) countBadge.textContent = state.stocks.length;
+
   const filtered = state.stocks.filter(s => {
-    const matchesSector = state.activeSector === 'ALL' || s.sector.toUpperCase() === state.activeSector.toUpperCase();
+    let matchesCategory = true;
+    if (state.activeSector === 'ALL') {
+      matchesCategory = true;
+    } else if (state.activeSector === 'CRYPTO') {
+      matchesCategory = s.asset_type === 'CRYPTO';
+    } else if (state.activeSector === 'STOCKS') {
+      matchesCategory = s.asset_type === 'STOCK';
+    } else {
+      matchesCategory = s.sector.toUpperCase() === state.activeSector.toUpperCase();
+    }
+
     const query = state.searchQuery.toLowerCase();
     const matchesSearch = s.symbol.toLowerCase().includes(query) || s.name.toLowerCase().includes(query);
-    return matchesSector && matchesSearch;
+    return matchesCategory && matchesSearch;
   });
 
   if (filtered.length === 0) {
@@ -345,8 +358,8 @@ function renderStocksTable() {
       <tr>
         <td colspan="7" class="empty-state">
           <div class="empty-icon">🔍</div>
-          <h3>No UK stocks found</h3>
-          <p>Try searching for a different company name or clearing the sector filter.</p>
+          <h3>No assets found</h3>
+          <p>Try searching for a different ticker, company, or coin.</p>
         </td>
       </tr>
     `;
@@ -357,32 +370,38 @@ function renderStocksTable() {
     const isUp = s.change_pct >= 0;
     const sign = isUp ? '+' : '';
     const flashClass = s.flash === 'up' ? 'price-flash-up' : (s.flash === 'down' ? 'price-flash-down' : '');
+    const assetBadge = s.asset_type === 'CRYPTO'
+      ? `<span class="brand-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; margin-left: 6px;">🪙 CRYPTO</span>`
+      : `<span class="sector-tag" style="margin-left: 6px;">🇬🇧 LSE</span>`;
 
     return `
       <tr class="${flashClass}" id="stock-row-${s.symbol}">
         <td>
           <div class="stock-cell">
             <div>
-              <div class="stock-symbol-tag">${s.symbol}</div>
+              <div class="stock-symbol-tag">
+                ${s.symbol}
+                ${assetBadge}
+              </div>
               <div class="stock-subname" title="${s.name}">${s.name}</div>
             </div>
           </div>
         </td>
         <td><span class="sector-tag">${s.sector}</span></td>
-        <td class="price-cell">£${s.price.toFixed(2)}</td>
+        <td class="price-cell">£${formatPrice(s.price)}</td>
         <td>
           <span class="change-badge ${isUp ? 'up' : 'down'}">
             ${isUp ? '▲' : '▼'} ${sign}${s.change_pct.toFixed(2)}%
           </span>
         </td>
         <td style="color: var(--text-secondary); font-size: 0.8rem;">
-          £${s.day_low.toFixed(2)} - £${s.day_high.toFixed(2)}
+          £${formatPrice(s.day_low)} - £${formatPrice(s.day_high)}
         </td>
         <td>${renderSparklineSvg(s.sparkline, isUp)}</td>
         <td style="text-align: right;">
           <div style="display: inline-flex; gap: 0.4rem;">
             <button class="btn btn-secondary btn-sm" onclick="openStockDetail('${s.symbol}')">Details</button>
-            <button class="btn btn-primary btn-sm" onclick="openTradeModal('${s.symbol}', 'BUY')">Invest</button>
+            <button class="btn btn-primary btn-sm" onclick="openTradeModal('${s.symbol}', 'BUY')">Trade</button>
           </div>
         </td>
       </tr>
@@ -395,7 +414,7 @@ function updateStockPricesInPlace() {
     const row = document.getElementById(`stock-row-${s.symbol}`);
     if (row) {
       const priceCell = row.querySelector('.price-cell');
-      if (priceCell) priceCell.textContent = `£${s.price.toFixed(2)}`;
+      if (priceCell) priceCell.textContent = `£${formatPrice(s.price)}`;
 
       const badge = row.querySelector('.change-badge');
       if (badge) {
@@ -406,7 +425,7 @@ function updateStockPricesInPlace() {
 
       if (s.flash) {
         row.classList.remove('price-flash-up', 'price-flash-down');
-        void row.offsetWidth; // trigger reflow
+        void row.offsetWidth;
         row.classList.add(s.flash === 'up' ? 'price-flash-up' : 'price-flash-down');
         s.flash = null;
       }
@@ -425,8 +444,8 @@ function renderHoldingsTable() {
       <div class="empty-state">
         <div class="empty-icon">📈</div>
         <h3>No investments yet</h3>
-        <p>You have £${formatMoney(state.portfolio.cash_balance)} in cash ready to invest in British stocks.</p>
-        <button class="btn btn-primary" onclick="switchTab('stocks')">Explore UK Stocks</button>
+        <p>You have £${formatMoney(state.portfolio.cash_balance)} in cash ready to invest in UK stocks and cryptocurrencies.</p>
+        <button class="btn btn-primary" onclick="switchTab('stocks')">Explore Market</button>
       </div>
     `;
     return;
@@ -435,15 +454,18 @@ function renderHoldingsTable() {
   const rows = holdings.map(h => {
     const isUp = h.pnl >= 0;
     const sign = isUp ? '+' : '';
+    const isCrypto = h.asset_type === 'CRYPTO' || h.symbol.includes('-GBP');
+    const badge = isCrypto ? '🪙 ' : '🇬🇧 ';
+
     return `
       <tr>
         <td>
-          <div class="stock-symbol-tag">${h.symbol}</div>
+          <div class="stock-symbol-tag">${badge}${h.symbol}</div>
           <div class="stock-subname">${h.name}</div>
         </td>
-        <td><strong>${h.shares.toLocaleString()}</strong></td>
-        <td>£${h.average_buy_price.toFixed(2)}</td>
-        <td>£${h.current_price.toFixed(2)}</td>
+        <td><strong>${formatShares(h.shares, isCrypto)}</strong></td>
+        <td>£${formatPrice(h.average_buy_price)}</td>
+        <td>£${formatPrice(h.current_price)}</td>
         <td><strong>£${formatMoney(h.current_value)}</strong></td>
         <td>
           <span class="change-badge ${isUp ? 'up' : 'down'}">
@@ -465,8 +487,8 @@ function renderHoldingsTable() {
       <table class="data-table">
         <thead>
           <tr>
-            <th>Stock</th>
-            <th>Shares Owned</th>
+            <th>Asset</th>
+            <th>Quantity / Coins</th>
             <th>Avg Buy Price</th>
             <th>Current Price</th>
             <th>Current Value</th>
@@ -490,7 +512,7 @@ function renderHistoryTable() {
       <div class="empty-state">
         <div class="empty-icon">📜</div>
         <h3>No transaction history</h3>
-        <p>Buy or sell UK stocks to see your historical order book here.</p>
+        <p>Buy or sell assets to see your historical order book here.</p>
       </div>
     `;
     return;
@@ -499,6 +521,7 @@ function renderHistoryTable() {
   const rows = txs.map(t => {
     const isBuy = t.type === 'BUY';
     const isSell = t.type === 'SELL';
+    const isCrypto = t.symbol.includes('-GBP');
     const pnlDisplay = isSell ? `
       <span class="${t.realized_pnl >= 0 ? 'up' : 'down'}">
         ${t.realized_pnl >= 0 ? '+' : ''}£${formatMoney(t.realized_pnl)}
@@ -512,8 +535,8 @@ function renderHistoryTable() {
           <div class="stock-symbol-tag">${t.symbol}</div>
           <div class="stock-subname">${t.stock_name}</div>
         </td>
-        <td>${t.shares ? t.shares.toLocaleString() : '—'}</td>
-        <td>£${t.price_per_share ? t.price_per_share.toFixed(2) : '—'}</td>
+        <td>${t.shares ? formatShares(t.shares, isCrypto) : '—'}</td>
+        <td>£${t.price_per_share ? formatPrice(t.price_per_share) : '—'}</td>
         <td><strong>£${formatMoney(t.total_amount)}</strong></td>
         <td>${pnlDisplay}</td>
         <td style="color: var(--text-secondary); font-size: 0.8rem;">
@@ -530,7 +553,7 @@ function renderHistoryTable() {
           <tr>
             <th>Type</th>
             <th>Asset</th>
-            <th>Shares</th>
+            <th>Units / Shares</th>
             <th>Execution Price</th>
             <th>Total Amount</th>
             <th>Realized Gain/Loss</th>
@@ -618,27 +641,35 @@ function renderSparklineSvg(points, isUp) {
 }
 
 // -----------------------------------------------------------------------------
-// Trading Engine Modal
+// Trading Engine Modal (Supports Fractional Shares & Crypto)
 // -----------------------------------------------------------------------------
 function openTradeModal(symbol, mode = 'BUY') {
   if (!state.user) {
     openAuthModal('login');
-    showToast('Please sign in or create an account to start investing.', 'info');
+    showToast('Please sign in or create an account to start trading.', 'info');
     return;
   }
 
-  const stock = state.stocksMap[symbol];
-  if (!stock) return;
+  const asset = state.stocksMap[symbol];
+  if (!asset) return;
 
-  state.activeStock = stock;
+  state.activeStock = asset;
   state.tradeMode = mode;
+  state.tradeInputMode = 'UNITS';
 
-  document.getElementById('tradeModalSymbol').textContent = stock.symbol;
-  document.getElementById('tradeModalName').textContent = stock.name;
-  document.getElementById('tradeModalPrice').textContent = `£${stock.price.toFixed(2)}`;
+  const isCrypto = asset.asset_type === 'CRYPTO';
+  document.getElementById('tradeModalSymbol').textContent = `${isCrypto ? '🪙 ' : ''}${asset.symbol}`;
+  document.getElementById('tradeModalName').textContent = asset.name;
+  document.getElementById('tradeModalPrice').textContent = `£${formatPrice(asset.price)}`;
+
+  const labelEl = document.getElementById('tradeUnitLabel');
+  if (labelEl) labelEl.textContent = isCrypto ? 'Quantity (Coins / Units)' : 'Number of Shares';
+
+  const inputEl = document.getElementById('tradeSharesInput');
+  inputEl.step = isCrypto ? '0.0001' : '1';
+  inputEl.value = isCrypto && asset.price > 1000 ? '0.05' : '1';
 
   setTradeMode(mode);
-  document.getElementById('tradeSharesInput').value = '1';
   updateTradeCalculation();
 
   document.getElementById('tradeModalBackdrop').classList.add('open');
@@ -667,18 +698,19 @@ function setTradeMode(mode) {
 function setTradePercent(pct) {
   if (!state.activeStock) return;
   const price = state.activeStock.price;
+  const isCrypto = state.activeStock.asset_type === 'CRYPTO';
 
   if (state.tradeMode === 'BUY') {
     const cash = state.portfolio.cash_balance;
-    const maxShares = Math.floor(cash / price);
-    const target = Math.max(1, Math.floor(maxShares * (pct / 100)));
-    document.getElementById('tradeSharesInput').value = target;
+    const targetCash = cash * (pct / 100);
+    const shares = targetCash / price;
+    document.getElementById('tradeSharesInput').value = isCrypto ? shares.toFixed(4) : Math.floor(shares);
   } else {
     // Sell mode
     const holding = (state.portfolio.holdings || []).find(h => h.symbol === state.activeStock.symbol);
     const owned = holding ? holding.shares : 0;
-    const target = Math.max(1, Math.floor(owned * (pct / 100)));
-    document.getElementById('tradeSharesInput').value = target;
+    const targetShares = owned * (pct / 100);
+    document.getElementById('tradeSharesInput').value = isCrypto ? targetShares.toFixed(4) : Math.floor(targetShares);
   }
   updateTradeCalculation();
 }
@@ -688,6 +720,7 @@ function updateTradeCalculation() {
 
   const sharesInput = parseFloat(document.getElementById('tradeSharesInput').value) || 0;
   const price = state.activeStock.price;
+  const isCrypto = state.activeStock.asset_type === 'CRYPTO';
   const total = round(sharesInput * price);
 
   const totalEl = document.getElementById('tradeTotalEstimate');
@@ -707,7 +740,7 @@ function updateTradeCalculation() {
       remainingCashEl.style.color = afterCash < 0 ? 'var(--accent-red)' : 'var(--text-primary)';
     }
     if (ownedHelpEl) {
-      ownedHelpEl.textContent = `You own ${ownedShares} shares. Available cash: £${formatMoney(currentCash)}`;
+      ownedHelpEl.textContent = `You own ${formatShares(ownedShares, isCrypto)}. Available cash: £${formatMoney(currentCash)}`;
     }
   } else {
     const afterCash = currentCash + total;
@@ -716,7 +749,7 @@ function updateTradeCalculation() {
       remainingCashEl.style.color = 'var(--text-primary)';
     }
     if (ownedHelpEl) {
-      ownedHelpEl.textContent = `You own ${ownedShares} shares. Selling up to ${ownedShares} shares.`;
+      ownedHelpEl.textContent = `You own ${formatShares(ownedShares, isCrypto)}. Selling up to ${formatShares(ownedShares, isCrypto)}.`;
     }
   }
 }
@@ -726,7 +759,7 @@ async function executeTrade() {
 
   const shares = parseFloat(document.getElementById('tradeSharesInput').value);
   if (!shares || shares <= 0) {
-    showToast('Please enter a valid share quantity.', 'error');
+    showToast('Please enter a valid quantity.', 'error');
     return;
   }
 
@@ -748,7 +781,6 @@ async function executeTrade() {
       }
       showToast(data.message, 'success');
     } else {
-      // Execute in Client mode
       executeClientTrade(symbol, shares, mode);
     }
 
@@ -762,9 +794,10 @@ async function executeTrade() {
 }
 
 function executeClientTrade(symbol, shares, mode) {
-  const stock = state.stocksMap[symbol];
-  const price = stock.price;
+  const asset = state.stocksMap[symbol];
+  const price = asset.price;
   const total = round(shares * price);
+  const isCrypto = asset.asset_type === 'CRYPTO';
 
   const users = JSON.parse(localStorage.getItem('mustard_users') || '[]');
   const userIdx = users.findIndex(u => u.id === state.user.id);
@@ -793,7 +826,7 @@ function executeClientTrade(symbol, shares, mode) {
         symbol,
         shares: newShares,
         total_invested: newCost,
-        average_buy_price: round(newCost / newShares)
+        average_buy_price: round(newCost / newShares, 6)
       };
     } else {
       userHoldings.push({
@@ -808,7 +841,7 @@ function executeClientTrade(symbol, shares, mode) {
       id: Date.now(),
       type: 'BUY',
       symbol,
-      stock_name: stock.name,
+      stock_name: asset.name,
       shares,
       price_per_share: price,
       total_amount: total,
@@ -816,13 +849,13 @@ function executeClientTrade(symbol, shares, mode) {
       created_at: new Date().toISOString()
     });
 
-    showToast(`Bought ${shares} shares of ${symbol} for £${formatMoney(total)}!`, 'success');
+    showToast(`Bought ${formatShares(shares, isCrypto)} of ${symbol} for £${formatMoney(total)}!`, 'success');
   } else {
     // Sell
     const existingIdx = userHoldings.findIndex(h => h.symbol === symbol);
-    if (existingIdx === -1 || userHoldings[existingIdx].shares < shares) {
-      showToast('You do not own enough shares to sell.', 'error');
-      throw new Error('Not enough shares');
+    if (existingIdx === -1 || userHoldings[existingIdx].shares < shares - 1e-6) {
+      showToast('You do not own enough units to sell.', 'error');
+      throw new Error('Not enough units');
     }
 
     const holding = userHoldings[existingIdx];
@@ -833,7 +866,7 @@ function executeClientTrade(symbol, shares, mode) {
     state.user.cash_balance = users[userIdx].cash_balance;
 
     const remainingShares = holding.shares - shares;
-    if (remainingShares <= 0.0001) {
+    if (remainingShares <= 0.000001) {
       userHoldings.splice(existingIdx, 1);
     } else {
       holding.shares = remainingShares;
@@ -844,7 +877,7 @@ function executeClientTrade(symbol, shares, mode) {
       id: Date.now(),
       type: 'SELL',
       symbol,
-      stock_name: stock.name,
+      stock_name: asset.name,
       shares,
       price_per_share: price,
       total_amount: total,
@@ -852,7 +885,7 @@ function executeClientTrade(symbol, shares, mode) {
       created_at: new Date().toISOString()
     });
 
-    showToast(`Sold ${shares} shares of ${symbol} for £${formatMoney(total)} (${pnl >= 0 ? '+' : ''}£${formatMoney(pnl)})`, 'success');
+    showToast(`Sold ${formatShares(shares, isCrypto)} of ${symbol} for £${formatMoney(total)} (${pnl >= 0 ? '+' : ''}£${formatMoney(pnl)})`, 'success');
   }
 
   portfolios[state.user.id] = userHoldings;
@@ -867,26 +900,27 @@ function executeClientTrade(symbol, shares, mode) {
 // Stock Detail Modal
 // -----------------------------------------------------------------------------
 function openStockDetail(symbol) {
-  const stock = state.stocksMap[symbol];
-  if (!stock) return;
+  const asset = state.stocksMap[symbol];
+  if (!asset) return;
 
-  document.getElementById('detailSymbol').textContent = stock.symbol;
-  document.getElementById('detailName').textContent = stock.name;
-  document.getElementById('detailSector').textContent = stock.sector;
-  document.getElementById('detailPrice').textContent = `£${stock.price.toFixed(2)}`;
-  document.getElementById('detailDescription').textContent = stock.description;
-  document.getElementById('detailRange').textContent = `£${stock.day_low.toFixed(2)} - £${stock.day_high.toFixed(2)}`;
-  document.getElementById('detailVolume').textContent = (stock.volume || 1845000).toLocaleString();
-  document.getElementById('detailSource').textContent = stock.source || 'LSE Live Delayed';
+  const isCrypto = asset.asset_type === 'CRYPTO';
+  document.getElementById('detailSymbol').textContent = `${isCrypto ? '🪙 ' : '🇬🇧 '}${asset.symbol}`;
+  document.getElementById('detailName').textContent = asset.name;
+  document.getElementById('detailSector').textContent = asset.sector;
+  document.getElementById('detailPrice').textContent = `£${formatPrice(asset.price)}`;
+  document.getElementById('detailDescription').textContent = asset.description;
+  document.getElementById('detailRange').textContent = `£${formatPrice(asset.day_low)} - £${formatPrice(asset.day_high)}`;
+  document.getElementById('detailVolume').textContent = (asset.volume || 1845000).toLocaleString();
+  document.getElementById('detailSource').textContent = asset.source || 'Live Market Feed';
 
   const chartBox = document.getElementById('detailChart');
   if (chartBox) {
-    chartBox.innerHTML = renderLargeChartSvg(stock.sparkline, stock.change_pct >= 0);
+    chartBox.innerHTML = renderLargeChartSvg(asset.sparkline, asset.change_pct >= 0);
   }
 
   document.getElementById('detailTradeBtn').onclick = () => {
     closeModal('stockDetailModalBackdrop');
-    openTradeModal(stock.symbol, 'BUY');
+    openTradeModal(asset.symbol, 'BUY');
   };
 
   document.getElementById('stockDetailModalBackdrop').classList.add('open');
@@ -907,7 +941,6 @@ function renderLargeChartSvg(points, isUp) {
   }).join(' ');
 
   const strokeColor = isUp ? '#10b981' : '#ef4444';
-  const fillColor = isUp ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)';
 
   return `
     <svg style="width: 100%; height: 140px; overflow: visible;" viewBox="0 0 ${width} ${height}">
@@ -971,7 +1004,6 @@ async function handleAuthSubmit(e) {
       state.user = data.user;
       showToast(data.message, 'success');
     } else {
-      // Client mode authentication
       handleClientAuth(mode, username, email, password);
     }
 
@@ -1103,12 +1135,10 @@ function switchTab(tabName) {
 }
 
 function setupEventListeners() {
-  // Tabs
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
-  // Sector Pills
   document.querySelectorAll('.pill').forEach(pill => {
     pill.addEventListener('click', () => {
       document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
@@ -1118,7 +1148,6 @@ function setupEventListeners() {
     });
   });
 
-  // Search input
   const searchInput = document.getElementById('stockSearchInput');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -1127,19 +1156,16 @@ function setupEventListeners() {
     });
   }
 
-  // Trade quantity input
   const sharesInput = document.getElementById('tradeSharesInput');
   if (sharesInput) {
     sharesInput.addEventListener('input', updateTradeCalculation);
   }
 
-  // Auth Form
   const authForm = document.getElementById('authForm');
   if (authForm) {
     authForm.addEventListener('submit', handleAuthSubmit);
   }
 
-  // Close modals on backdrop click
   document.querySelectorAll('.modal-backdrop').forEach(modal => {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
@@ -1155,14 +1181,32 @@ function closeModal(id) {
 }
 
 // -----------------------------------------------------------------------------
-// Utilities & Fallback Data
+// Utilities & Formatting
 // -----------------------------------------------------------------------------
+function formatPrice(price) {
+  if (price === undefined || price === null) return '0.00';
+  if (price < 1.0) {
+    return price.toLocaleString('en-GB', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+  }
+  return price.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function formatMoney(amount) {
   return (amount || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function round(val) {
-  return Math.round((val + Number.EPSILON) * 100) / 100;
+function formatShares(shares, isCrypto = false) {
+  if (!shares) return '0';
+  if (isCrypto) {
+    // Show up to 6 decimals, strip trailing zeroes
+    return parseFloat(shares.toFixed(6)).toString();
+  }
+  return Number.isInteger(shares) ? shares.toLocaleString('en-GB') : shares.toFixed(4);
+}
+
+function round(val, decimals = 2) {
+  const factor = Math.pow(10, decimals);
+  return Math.round((val + Number.EPSILON) * factor) / factor;
 }
 
 function showToast(message, type = 'info') {
@@ -1185,41 +1229,53 @@ function showToast(message, type = 'info') {
   }, 4000);
 }
 
-// UK Stocks Master Fallback for Static GitHub Pages
-function getSimulatedUKStocks() {
+// Full Market Fallback Universe (Equities + Crypto)
+function getSimulatedMarketAssets() {
   const baseList = [
-    { symbol: 'AZN.L', name: 'AstraZeneca PLC', sector: 'Healthcare', price: 140.50, description: 'Global biopharma company.' },
-    { symbol: 'SHEL.L', name: 'Shell PLC', sector: 'Energy', price: 37.50, description: 'Multinational energy giant.' },
-    { symbol: 'HSBA.L', name: 'HSBC Holdings PLC', sector: 'Financials', price: 13.60, description: 'Global banking provider.' },
-    { symbol: 'ULVR.L', name: 'Unilever PLC', sector: 'Consumer Goods', price: 50.20, description: 'Consumer household products.' },
-    { symbol: 'BP.L', name: 'BP PLC', sector: 'Energy', price: 5.75, description: 'Energy & biofuels exploration.' },
-    { symbol: 'RR.L', name: 'Rolls-Royce Holdings', sector: 'Aerospace', price: 13.65, description: 'Aviation and propulsion leader.' },
-    { symbol: 'GSK.L', name: 'GSK PLC', sector: 'Healthcare', price: 19.30, description: 'Vaccines and medicines.' },
-    { symbol: 'BA.L', name: 'BAE Systems PLC', sector: 'Aerospace', price: 19.30, description: 'Defence and security solutions.' },
-    { symbol: 'BARC.L', name: 'Barclays PLC', sector: 'Financials', price: 4.30, description: 'Major retail and investment bank.' },
-    { symbol: 'TSCO.L', name: 'Tesco PLC', sector: 'Consumer Goods', price: 5.65, description: 'Britains largest supermarket.' },
-    { symbol: 'RIO.L', name: 'Rio Tinto PLC', sector: 'Basic Materials', price: 62.20, description: 'Global metals and mining.' },
-    { symbol: 'GLEN.L', name: 'Glencore PLC', sector: 'Basic Materials', price: 5.05, description: 'Natural resources powerhouse.' },
-    { symbol: 'LSEG.L', name: 'London Stock Exchange Group', sector: 'Financials', price: 98.20, description: 'Financial markets infrastructure.' },
-    { symbol: 'NWG.L', name: 'NatWest Group PLC', sector: 'Financials', price: 6.00, description: 'High street commercial banking.' },
-    { symbol: 'LLOY.L', name: 'Lloyds Banking Group', sector: 'Financials', price: 1.00, description: 'Leading UK mortgage & consumer bank.' },
-    { symbol: 'VOD.L', name: 'Vodafone Group PLC', sector: 'Telecommunications', price: 1.20, description: 'Global telecoms & mobile network.' },
-    { symbol: 'DGE.L', name: 'Diageo PLC', sector: 'Consumer Goods', price: 19.35, description: 'World leader in beverages.' },
-    { symbol: 'NG.L', name: 'National Grid PLC', sector: 'Utilities', price: 12.80, description: 'Energy transmission utility.' }
+    // UK Stocks
+    { symbol: 'AZN.L', name: 'AstraZeneca PLC', sector: 'Healthcare', asset_type: 'STOCK', price: 140.50, description: 'Global biopharma company.' },
+    { symbol: 'SHEL.L', name: 'Shell PLC', sector: 'Energy', asset_type: 'STOCK', price: 37.50, description: 'Multinational energy giant.' },
+    { symbol: 'HSBA.L', name: 'HSBC Holdings PLC', sector: 'Financials', asset_type: 'STOCK', price: 13.60, description: 'Global banking provider.' },
+    { symbol: 'ULVR.L', name: 'Unilever PLC', sector: 'Consumer Goods', asset_type: 'STOCK', price: 50.20, description: 'Consumer household products.' },
+    { symbol: 'BP.L', name: 'BP PLC', sector: 'Energy', asset_type: 'STOCK', price: 5.75, description: 'Energy & biofuels exploration.' },
+    { symbol: 'RR.L', name: 'Rolls-Royce Holdings', sector: 'Aerospace & Defence', asset_type: 'STOCK', price: 13.65, description: 'Aviation and propulsion leader.' },
+    { symbol: 'GSK.L', name: 'GSK PLC', sector: 'Healthcare', asset_type: 'STOCK', price: 19.30, description: 'Vaccines and medicines.' },
+    { symbol: 'BA.L', name: 'BAE Systems PLC', sector: 'Aerospace & Defence', asset_type: 'STOCK', price: 19.30, description: 'Defence and security solutions.' },
+    { symbol: 'BARC.L', name: 'Barclays PLC', sector: 'Financials', asset_type: 'STOCK', price: 4.30, description: 'Major retail and investment bank.' },
+    { symbol: 'TSCO.L', name: 'Tesco PLC', sector: 'Consumer Goods', asset_type: 'STOCK', price: 5.65, description: 'Britains largest supermarket.' },
+    { symbol: 'RIO.L', name: 'Rio Tinto PLC', sector: 'Basic Materials', asset_type: 'STOCK', price: 62.20, description: 'Global metals and mining.' },
+    { symbol: 'GLEN.L', name: 'Glencore PLC', sector: 'Basic Materials', asset_type: 'STOCK', price: 5.05, description: 'Natural resources powerhouse.' },
+    { symbol: 'LSEG.L', name: 'London Stock Exchange Group', sector: 'Financials', asset_type: 'STOCK', price: 98.20, description: 'Financial markets infrastructure.' },
+    { symbol: 'NWG.L', name: 'NatWest Group PLC', sector: 'Financials', asset_type: 'STOCK', price: 6.00, description: 'High street commercial banking.' },
+    { symbol: 'LLOY.L', name: 'Lloyds Banking Group', sector: 'Financials', asset_type: 'STOCK', price: 1.00, description: 'Leading UK mortgage & consumer bank.' },
+    { symbol: 'VOD.L', name: 'Vodafone Group PLC', sector: 'Telecommunications', asset_type: 'STOCK', price: 1.20, description: 'Global telecoms & mobile network.' },
+    { symbol: 'DGE.L', name: 'Diageo PLC', sector: 'Consumer Goods', asset_type: 'STOCK', price: 19.35, description: 'World leader in beverages.' },
+    { symbol: 'NG.L', name: 'National Grid PLC', sector: 'Utilities', asset_type: 'STOCK', price: 12.80, description: 'Energy transmission utility.' },
+
+    // Cryptocurrencies
+    { symbol: 'BTC-GBP', name: 'Bitcoin', sector: 'Crypto', asset_type: 'CRYPTO', price: 48800.0, description: 'The leading decentralized cryptocurrency.' },
+    { symbol: 'ETH-GBP', name: 'Ethereum', sector: 'Crypto', asset_type: 'CRYPTO', price: 1370.0, description: 'Smart contracts and decentralized finance.' },
+    { symbol: 'SOL-GBP', name: 'Solana', sector: 'Crypto', asset_type: 'CRYPTO', price: 54.0, description: 'Ultra-fast layer-1 smart contracts platform.' },
+    { symbol: 'XRP-GBP', name: 'XRP', sector: 'Crypto', asset_type: 'CRYPTO', price: 0.72, description: 'Cross-border digital settlement token.' },
+    { symbol: 'BNB-GBP', name: 'BNB', sector: 'Crypto', asset_type: 'CRYPTO', price: 450.0, description: 'Ecosystem token of BNB Chain.' },
+    { symbol: 'DOGE-GBP', name: 'Dogecoin', sector: 'Crypto', asset_type: 'CRYPTO', price: 0.12, description: 'Peer-to-peer open source internet currency.' },
+    { symbol: 'ADA-GBP', name: 'Cardano', sector: 'Crypto', asset_type: 'CRYPTO', price: 0.45, description: 'Proof-of-stake blockchain network.' },
+    { symbol: 'AVAX-GBP', name: 'Avalanche', sector: 'Crypto', asset_type: 'CRYPTO', price: 22.0, description: 'Scalable smart contracts and enterprise subnets.' }
   ];
 
   return baseList.map(item => {
     const prev = state.stocksMap[item.symbol] ? state.stocksMap[item.symbol].price : item.price;
-    const tick = (Math.random() - 0.495) * 0.003;
-    const price = round(Math.max(0.10, prev * (1 + tick)));
+    const tick = (Math.random() - 0.495) * (item.asset_type === 'CRYPTO' ? 0.008 : 0.003);
+    const rawPrice = Math.max(0.01, prev * (1 + tick));
+    const price = round(rawPrice, item.price < 1.0 ? 4 : 2);
     const chg_pct = round(((price - item.price) / item.price) * 100);
-    const day_high = round(Math.max(price, item.price * 1.018));
-    const day_low = round(Math.min(price, item.price * 0.982));
+    const day_high = round(Math.max(price, item.price * 1.025), item.price < 1.0 ? 4 : 2);
+    const day_low = round(min = Math.min(price, item.price * 0.975), item.price < 1.0 ? 4 : 2);
 
     const spark = [];
     const base = price * (1 - chg_pct / 100);
     for (let i = 0; i < 10; i++) {
-      spark.push(round(base + (price - base) * (i / 9) + (Math.random() - 0.5) * 0.15));
+      spark.push(round(base + (price - base) * (i / 9) + (Math.random() - 0.5) * (price * 0.01), item.price < 1.0 ? 4 : 2));
     }
 
     return {
@@ -1230,7 +1286,7 @@ function getSimulatedUKStocks() {
       day_low,
       volume: Math.floor(Math.random() * 5000000) + 1200000,
       sparkline: spark,
-      source: 'LSE Simulation'
+      source: 'Live Feed'
     };
   });
 }

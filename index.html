@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mustard Investments UK | Real-time Stock Trading Simulator</title>
-  <meta name="description" content="Trade real UK FTSE 100 stocks in real-time with £10,000 starting cash. Learn investing risk-free with private multi-user accounts.">
+  <title>Mustard Investments UK | Real-time UK Stocks & Crypto Trading Simulator</title>
+  <meta name="description" content="Trade real UK FTSE 100 stocks and leading cryptocurrencies in real-time with £10,000 starting cash. Learn investing risk-free with private multi-user accounts.">
   <link rel="stylesheet" href="static/css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🟡</text></svg>">
 </head>
@@ -13,8 +13,7 @@
   <!-- Live Scrolling Ticker Tape -->
   <div class="ticker-tape">
     <div class="ticker-track" id="tickerTrack">
-      <!-- Injected by JavaScript -->
-      <div class="ticker-item"><span class="ticker-sym">LSE</span> Loading London Market Data...</div>
+      <div class="ticker-item"><span class="ticker-sym">LSE</span> Loading Market Feeds (Stocks & Crypto)...</div>
     </div>
   </div>
 
@@ -25,12 +24,12 @@
       <div>
         <div class="brand-title">Mustard <span>Investments</span></div>
       </div>
-      <span class="brand-badge">🇬🇧 UK FTSE 100</span>
+      <span class="brand-badge">🇬🇧 UK Stocks & 🪙 Crypto</span>
     </div>
 
     <div class="market-status">
       <div class="status-dot"></div>
-      <span style="font-weight: 600;">London Stock Exchange</span>
+      <span style="font-weight: 600;">London Markets Live</span>
       <span style="color: var(--text-muted); font-size: 0.75rem;">•</span>
       <span id="marketClock" style="color: var(--mustard-400); font-weight: 700;">--:--:-- GMT</span>
     </div>
@@ -61,13 +60,13 @@
     <!-- Hero Banner -->
     <section class="hero-banner">
       <div class="hero-text">
-        <h1>Master the UK Stock Market with <span class="hero-highlight">£10,000</span></h1>
+        <h1>Master UK Stocks & Crypto with <span class="hero-highlight">£10,000</span></h1>
         <p>
-          Trade real-time London Stock Exchange equities with live market prices, isolate your private portfolio from other investors, and build your wealth risk-free.
+          Trade real-time London Stock Exchange equities and top cryptocurrencies like Bitcoin and Ethereum with live prices. Keep your private portfolio isolated from other investors, and build your wealth risk-free.
         </p>
       </div>
       <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-        <button class="btn btn-primary" onclick="switchTab('stocks')">Explore Stocks</button>
+        <button class="btn btn-primary" onclick="switchTab('stocks')">Explore Market</button>
         <button class="btn btn-secondary" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
       </div>
     </section>
@@ -104,7 +103,7 @@
         </div>
         <div class="stat-value" id="statInvested">£0.00</div>
         <div class="stat-sub" style="color: var(--text-secondary);">
-          Current market value of held shares
+          Current value of held stocks & crypto
         </div>
       </div>
 
@@ -115,7 +114,7 @@
         </div>
         <div class="stat-value" style="color: var(--accent-green);">£0.00 Fees</div>
         <div class="stat-sub" style="color: var(--text-secondary);">
-          Live LSE streaming quotes
+          Live LSE & Crypto streaming feeds
         </div>
       </div>
     </section>
@@ -123,7 +122,7 @@
     <!-- Main Tabs -->
     <div class="main-tabs">
       <button class="tab-btn active" data-tab="stocks">
-        🇬🇧 Market Watch (FTSE 100) <span class="tab-count" id="tabCountStocks">18</span>
+        📈 Market Watch (Stocks & Crypto) <span class="tab-count" id="tabCountStocks">26</span>
       </button>
       <button class="tab-btn" data-tab="portfolio">
         💼 My Portfolio
@@ -136,16 +135,18 @@
       </button>
     </div>
 
-    <!-- Tab 1: Stocks List -->
+    <!-- Tab 1: Stocks & Crypto Market List -->
     <div id="stocksTabContent">
       <div class="controls-bar">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
-          <input type="text" id="stockSearchInput" class="search-input" placeholder="Search by stock ticker or company name...">
+          <input type="text" id="stockSearchInput" class="search-input" placeholder="Search by ticker, company, or coin name...">
         </div>
 
         <div class="sector-pills">
-          <button class="pill active" data-sector="ALL">All Sectors</button>
+          <button class="pill active" data-sector="ALL">All Assets</button>
+          <button class="pill" data-sector="CRYPTO" style="border-color: rgba(245, 158, 11, 0.4);">🪙 Crypto</button>
+          <button class="pill" data-sector="STOCKS">🇬🇧 UK Stocks</button>
           <button class="pill" data-sector="HEALTHCARE">Healthcare</button>
           <button class="pill" data-sector="ENERGY">Energy</button>
           <button class="pill" data-sector="FINANCIALS">Financials</button>
@@ -159,7 +160,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Company & Symbol</th>
+              <th>Asset & Symbol</th>
               <th>Sector</th>
               <th>Current Price</th>
               <th>24h Change</th>
@@ -220,18 +221,18 @@
 
         <div class="trade-quote-box">
           <div>
-            <div class="quote-sym" id="tradeModalSymbol">AZN.L</div>
-            <div class="quote-sub" id="tradeModalName">AstraZeneca PLC</div>
+            <div class="quote-sym" id="tradeModalSymbol">BTC-GBP</div>
+            <div class="quote-sub" id="tradeModalName">Bitcoin</div>
           </div>
           <div>
-            <div class="quote-price" id="tradeModalPrice">£140.50</div>
-            <div style="font-size: 0.72rem; color: var(--text-secondary); text-align: right;">Live LSE Price</div>
+            <div class="quote-price" id="tradeModalPrice">£48,800.00</div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary); text-align: right;">Live Price (GBP)</div>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Number of Shares</label>
-          <input type="number" id="tradeSharesInput" class="form-input" min="1" step="1" value="1">
+          <label class="form-label" id="tradeUnitLabel">Quantity (Shares / Coins)</label>
+          <input type="number" id="tradeSharesInput" class="form-input" min="0.0001" step="any" value="1">
           <div class="quick-pct-chips">
             <button class="pct-chip" onclick="setTradePercent(25)">25%</button>
             <button class="pct-chip" onclick="setTradePercent(50)">50%</button>
@@ -271,20 +272,20 @@
     <div class="modal-card" style="max-width: 520px;">
       <div class="modal-header">
         <div>
-          <div class="modal-title" id="detailName">AstraZeneca PLC</div>
-          <div style="font-size: 0.78rem; color: var(--text-secondary);" id="detailSymbol">AZN.L</div>
+          <div class="modal-title" id="detailName">Bitcoin</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);" id="detailSymbol">BTC-GBP</div>
         </div>
         <button class="modal-close" onclick="closeModal('stockDetailModalBackdrop')">&times;</button>
       </div>
       <div class="modal-body">
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.25rem;">
           <div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #fff;" id="detailPrice">£140.50</div>
-            <div class="sector-tag" id="detailSector">Healthcare</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #fff;" id="detailPrice">£48,800.00</div>
+            <div class="sector-tag" id="detailSector">Crypto</div>
           </div>
           <div style="text-align: right;">
             <div style="font-size: 0.75rem; color: var(--text-secondary);">Market Feed:</div>
-            <div style="font-size: 0.82rem; font-weight: 600; color: var(--mustard-400);" id="detailSource">LSE Live Delayed</div>
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--mustard-400);" id="detailSource">Live Market Feed</div>
           </div>
         </div>
 
@@ -293,23 +294,23 @@
         </div>
 
         <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.25rem;" id="detailDescription">
-          Biopharmaceutical company specializing in oncology, rare diseases, and vaccines.
+          The premier decentralized digital currency and global cryptographic store of value.
         </div>
 
         <div class="trade-breakdown">
           <div class="breakdown-row">
             <span>24h Range:</span>
-            <span id="detailRange" style="color: #fff;">£139.60 - £141.20</span>
+            <span id="detailRange" style="color: #fff;">£47,500.00 - £49,200.00</span>
           </div>
           <div class="breakdown-row">
             <span>Trading Volume:</span>
-            <span id="detailVolume" style="color: #fff;">2,810,400</span>
+            <span id="detailVolume" style="color: #fff;">18,450,000</span>
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('stockDetailModalBackdrop')">Close</button>
-        <button class="btn btn-primary" id="detailTradeBtn">Invest in this Stock</button>
+        <button class="btn btn-primary" id="detailTradeBtn">Trade this Asset</button>
       </div>
     </div>
   </div>
@@ -324,7 +325,7 @@
       <form id="authForm">
         <div class="modal-body">
           <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: var(--mustard-400);">
-            ✨ <strong>£10,000.00 Starting Balance:</strong> Every new private account starts with £10k in virtual capital to trade live UK equities.
+            ✨ <strong>£10,000.00 Starting Balance:</strong> Every new private account starts with £10k in virtual capital to trade live UK equities and cryptocurrencies.
           </div>
 
           <div class="form-group">
