@@ -3,613 +3,362 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mustard Investments | Virtual Portfolio & Paper Trading Simulator</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css">
-  
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟡</text></svg>">
+  <title>Mustard Investments UK | Real-time Stock Trading Simulator</title>
+  <meta name="description" content="Trade real UK FTSE 100 stocks in real-time with £10,000 starting cash. Learn investing risk-free with private multi-user accounts.">
+  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🟡</text></svg>">
 </head>
-<body class="min-h-screen bg-[#090D16] text-slate-100 flex flex-col">
+<body>
 
-  <!-- ==============================================================================
-       Top Application Header
-       ============================================================================== -->
-  <header class="border-b border-slate-800 bg-[#0F172A]/90 backdrop-blur sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Brand Logo -->
-      <div class="flex items-center gap-3 cursor-pointer" onclick="showView('dashboard')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 font-black text-slate-950 text-xl tracking-tighter">
-          M
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-extrabold tracking-tight text-lg text-amber-400">MUSTARD</span>
-            <span class="font-light text-slate-300 text-lg">INVESTMENTS</span>
-            <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Replica</span>
-          </div>
-          <div class="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot inline-block"></span>
-            <span>Simulated Market Feed Active</span>
-            <span class="text-slate-600">•</span>
-            <span class="text-slate-400">Zero Financial Risk</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Metrics Bar (Desktop) -->
-      <div class="hidden lg:flex items-center gap-6 border-x border-slate-800/80 px-6">
-        <div>
-          <div class="text-[11px] text-slate-400 font-medium">Total Net Worth</div>
-          <div class="text-base font-extrabold text-slate-100" id="metric-total-value">£25,000.00</div>
-        </div>
-        <div>
-          <div class="text-[11px] text-slate-400 font-medium">Buying Power</div>
-          <div class="text-base font-extrabold text-amber-400" id="metric-cash-value">£14,250.00</div>
-        </div>
-        <div>
-          <div class="text-[11px] text-slate-400 font-medium">Today's P&L</div>
-          <div class="text-sm font-semibold text-emerald-400" id="metric-day-gain">+£0.00 (+0.00%)</div>
-        </div>
-        <div>
-          <div class="text-[11px] text-slate-400 font-medium">Total Return</div>
-          <div class="text-sm font-semibold text-emerald-400" id="metric-total-return">+£0.00 (+0.00%)</div>
-        </div>
-      </div>
-
-      <!-- Action Controls -->
-      <div class="flex items-center gap-2.5">
-        <!-- Currency Switcher -->
-        <button onclick="toggleCurrency()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2 rounded-lg border border-slate-700 transition flex items-center gap-1.5" title="Switch between GBP (£) and USD ($)">
-          <span id="currency-btn-label">£ GBP</span>
-        </button>
-
-        <!-- Backup & Reset Dropdown -->
-        <button onclick="openBackupModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition" title="Export or Import Portfolio Backup">
-          💾 Backup
-        </button>
-
-        <button onclick="openResetModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition" title="Reset Portfolio to Default Balance">
-          ↺ Reset
-        </button>
-
-        <!-- Gamification Pills -->
-        <div class="hidden sm:flex items-center gap-2 pl-2">
-          <span class="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold px-2.5 py-1.5 rounded-lg" id="header-xp">
-            1,420 XP
-          </span>
-          <span class="bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold px-2.5 py-1.5 rounded-lg" id="header-streak">
-            🔥 7d Streak
-          </span>
-        </div>
-      </div>
-
+  <!-- Live Scrolling Ticker Tape -->
+  <div class="ticker-tape">
+    <div class="ticker-track" id="tickerTrack">
+      <!-- Injected by JavaScript -->
+      <div class="ticker-item"><span class="ticker-sym">LSE</span> Loading London Market Data...</div>
     </div>
+  </div>
 
-    <!-- Navigation Tabs Bar -->
-    <div class="border-t border-slate-800/80 bg-slate-900/50 overflow-x-auto scrollbar-none">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 py-2">
-        <button onclick="showView('dashboard')" data-view="dashboard" class="nav-tab active px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 border border-transparent">
-          📊 <span>Dashboard</span>
-        </button>
-        <button onclick="showView('holdings')" data-view="holdings" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 border border-transparent">
-          💼 <span>Holdings & Positions</span>
-        </button>
-        <button onclick="showView('markets')" data-view="markets" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 border border-transparent">
-          📈 <span>Markets & Screener</span>
-        </button>
-        <button onclick="showView('trade')" data-view="trade" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 border border-transparent">
-          ⚡ <span>Quick Trade</span>
-        </button>
-        <button onclick="showView('leaderboard')" data-view="leaderboard" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 border border-transparent">
-          🏆 <span>Mustard Cup</span>
-        </button>
-        <button onclick="showView('history')" data-view="history" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 border border-transparent">
-          📜 <span>Order History</span>
-        </button>
-        <button onclick="showView('badges')" data-view="badges" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 border border-transparent">
-          🎯 <span>Badges & Quests</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- ==============================================================================
-       Main Content Container
-       ============================================================================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-    <!-- --------------------------------------------------------------------------
-         VIEW 1: Dashboard
-         -------------------------------------------------------------------------- -->
-    <div id="view-dashboard" class="view-panel space-y-6">
-
-      <!-- Hero Portfolio Growth Chart Card -->
-      <div class="mustard-card p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-          <div>
-            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Portfolio Performance</div>
-            <div class="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-1 flex items-baseline gap-3">
-              <span id="dash-hero-value">£25,000.00</span>
-              <span class="text-sm font-semibold text-emerald-400" id="dash-hero-gain">+£0.00 (+0.00%) All Time</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
-            <button class="px-2.5 py-1 rounded font-bold text-slate-400 hover:text-slate-200">1D</button>
-            <button class="px-2.5 py-1 rounded font-bold text-slate-400 hover:text-slate-200">1W</button>
-            <button class="px-2.5 py-1 rounded font-bold bg-amber-500/20 text-amber-400">1M</button>
-            <button class="px-2.5 py-1 rounded font-bold text-slate-400 hover:text-slate-200">1Y</button>
-            <button class="px-2.5 py-1 rounded font-bold text-slate-400 hover:text-slate-200">ALL</button>
-          </div>
-        </div>
-
-        <div class="h-64 sm:h-72 w-full">
-          <canvas id="netWorthChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Watchlist Slider -->
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="brand-group" onclick="switchTab('stocks')">
+      <div class="brand-icon">📈</div>
       <div>
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-            <span>⭐ Watchlist Quick Monitor</span>
-          </h2>
-          <button onclick="showView('markets')" class="text-xs text-amber-400 hover:underline font-semibold">
-            Explore All Assets →
-          </button>
-        </div>
-        <div id="watchlist-carousel" class="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-          <!-- Dynamically populated -->
-        </div>
+        <div class="brand-title">Mustard <span>Investments</span></div>
       </div>
-
-      <!-- Two Column: Active Positions & Asset Allocation -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Top Holdings Preview (2 cols) -->
-        <div class="lg:col-span-2 mustard-card p-5">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="font-bold text-base text-slate-200 flex items-center gap-2">
-              <span>💼 Active Portfolio Holdings</span>
-            </h2>
-            <button onclick="showView('holdings')" class="text-xs text-amber-400 hover:underline font-semibold">
-              View All Positions →
-            </button>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead>
-                <tr class="text-xs text-slate-400 border-b border-slate-800">
-                  <th class="py-2 px-4">Asset</th>
-                  <th class="py-2 px-4 text-right">Shares</th>
-                  <th class="py-2 px-4 text-right">Price</th>
-                  <th class="py-2 px-4 text-right">Value</th>
-                  <th class="py-2 px-4 text-right">P&L</th>
-                </tr>
-              </thead>
-              <tbody id="dashboard-holdings-preview">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Asset Allocation & Quick Stats (1 col) -->
-        <div class="space-y-6">
-          <div class="mustard-card p-5">
-            <h3 class="font-bold text-sm text-slate-300 mb-3 flex items-center gap-2">
-              <span>🥧 Asset Allocation</span>
-            </h3>
-            <div id="allocation-bars">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-
-          <div class="mustard-card p-5">
-            <h3 class="font-bold text-sm text-slate-300 mb-3 flex items-center gap-2">
-              <span>🎯 Mustard Cup Ranking</span>
-            </h3>
-            <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5 mb-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-amber-300 font-semibold">Current Cup Rank</span>
-                <span class="text-lg font-black text-amber-400">#4 of 1,280</span>
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Leading inter-school and community simulation!</div>
-            </div>
-            <button onclick="showView('leaderboard')" class="w-full bg-slate-800 hover:bg-slate-700 text-xs font-bold py-2 rounded-lg transition text-slate-200">
-              Open Championship Leaderboard →
-            </button>
-          </div>
-        </div>
-
-      </div>
-
+      <span class="brand-badge">🇬🇧 UK FTSE 100</span>
     </div>
 
-    <!-- --------------------------------------------------------------------------
-         VIEW 2: Holdings & Positions
-         -------------------------------------------------------------------------- -->
-    <div id="view-holdings" class="view-panel hidden space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-black text-slate-100">Your Portfolio Holdings</h1>
-          <p class="text-sm text-slate-400 mt-0.5">Manage your active positions, view realized profit/loss, and trade instantly.</p>
-        </div>
-        <button onclick="showView('markets')" class="mustard-btn-primary px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2">
-          <span>+ Invest in New Assets</span>
-        </button>
-      </div>
-
-      <div class="mustard-card overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-900/80 text-xs text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-3 px-4">Asset</th>
-                <th class="py-3 px-4">Category</th>
-                <th class="py-3 px-4 text-right">Shares</th>
-                <th class="py-3 px-4 text-right">Current Price</th>
-                <th class="py-3 px-4 text-right">Market Value</th>
-                <th class="py-3 px-4 text-right">Total Return</th>
-                <th class="py-3 px-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="holdings-table-body">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <div class="market-status">
+      <div class="status-dot"></div>
+      <span style="font-weight: 600;">London Stock Exchange</span>
+      <span style="color: var(--text-muted); font-size: 0.75rem;">•</span>
+      <span id="marketClock" style="color: var(--mustard-400); font-weight: 700;">--:--:-- GMT</span>
     </div>
 
-    <!-- --------------------------------------------------------------------------
-         VIEW 3: Markets & Screener
-         -------------------------------------------------------------------------- -->
-    <div id="view-markets" class="view-panel hidden space-y-6">
-      <div>
-        <h1 class="text-2xl font-black text-slate-100">Market Explorer & Asset Screener</h1>
-        <p class="text-sm text-slate-400 mt-0.5">Browse UK London Stock Exchange blue chips, US Tech Titans, Cryptocurrencies, and Halal-certified investments.</p>
+    <div class="nav-actions">
+      <!-- Guest Navigation -->
+      <div id="guestNav" style="display: flex; gap: 0.5rem; align-items: center;">
+        <button class="btn btn-secondary btn-sm" onclick="openAuthModal('login')">Sign In</button>
+        <button class="btn btn-primary btn-sm" onclick="openAuthModal('register')">Get £10,000 Account</button>
       </div>
 
-      <!-- Search & Filters -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <!-- Search input -->
-        <div class="relative flex-1 max-w-md">
-          <input type="text" id="market-search-input" placeholder="Search by ticker (e.g. RR, SHEL, NVDA) or name..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500">
+      <!-- Logged-in User Navigation -->
+      <div id="userNav" class="user-menu" style="display: none;">
+        <div class="avatar-circle" id="navAvatar">U</div>
+        <div class="user-meta">
+          <span class="user-name" id="navUsername">Trader</span>
+          <span class="user-cash-label">Cash: £<span id="navCash">10,000.00</span></span>
         </div>
-
-        <!-- Filter pills -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <button onclick="setMarketFilter('ALL')" data-filter="ALL" class="pill-btn market-filter-pill active">All Assets</button>
-          <button onclick="setMarketFilter('FTSE')" data-filter="FTSE" class="pill-btn market-filter-pill">🇬🇧 FTSE 100</button>
-          <button onclick="setMarketFilter('US')" data-filter="US" class="pill-btn market-filter-pill">🇺🇸 US Tech</button>
-          <button onclick="setMarketFilter('CRYPTO')" data-filter="CRYPTO" class="pill-btn market-filter-pill">⚡ Crypto</button>
-          <button onclick="setMarketFilter('ETF')" data-filter="ETF" class="pill-btn market-filter-pill">📊 ETFs</button>
-          <button onclick="setMarketFilter('HALAL')" data-filter="HALAL" class="pill-btn market-filter-pill">🌱 Halal / Faith</button>
-          <button onclick="setMarketFilter('GAINERS')" data-filter="GAINERS" class="pill-btn market-filter-pill text-emerald-400">🔥 Top Gainers</button>
-          <button onclick="setMarketFilter('LOSERS')" data-filter="LOSERS" class="pill-btn market-filter-pill text-rose-400">📉 Dip Buys</button>
-        </div>
-      </div>
-
-      <!-- Assets Grid -->
-      <div id="markets-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Dynamically populated -->
+        <button class="btn btn-ghost btn-sm" onclick="resetAccount()" title="Reset account back to £10,000">↺ Reset</button>
+        <button class="btn btn-ghost btn-sm" onclick="handleLogout()" title="Log out">Sign Out</button>
       </div>
     </div>
+  </nav>
 
-    <!-- --------------------------------------------------------------------------
-         VIEW 4: Quick Trade Terminal
-         -------------------------------------------------------------------------- -->
-    <div id="view-trade" class="view-panel hidden max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 class="text-2xl font-black text-slate-100">Trade Execution Terminal</h1>
-        <p class="text-sm text-slate-400 mt-0.5">Execute simulated market orders with zero commission fees and instant settlement.</p>
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <div class="hero-text">
+        <h1>Master the UK Stock Market with <span class="hero-highlight">£10,000</span></h1>
+        <p>
+          Trade real-time London Stock Exchange equities with live market prices, isolate your private portfolio from other investors, and build your wealth risk-free.
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="switchTab('stocks')">Explore Stocks</button>
+        <button class="btn btn-secondary" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
+      </div>
+    </section>
+
+    <!-- 4 Key Portfolio Metrics -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Portfolio Value</span>
+          <div class="stat-icon">💼</div>
+        </div>
+        <div class="stat-value" id="statTotalValue">£10,000.00</div>
+        <div class="stat-sub up" id="statPnl">
+          <span>▲ £0.00 (+0.00%)</span>
+          <span style="color: var(--text-muted); font-weight: normal; margin-left: 4px;">from £10k start</span>
+        </div>
       </div>
 
-      <div class="mustard-card p-6 space-y-5">
-        <!-- Asset Selector -->
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Select Asset</label>
-          <select id="trade-terminal-asset-select" onchange="updateTradeTerminalPreview()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 font-bold focus:outline-none focus:border-amber-500">
-            <!-- Dynamically populated -->
-          </select>
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Available Cash</span>
+          <div class="stat-icon">💷</div>
+        </div>
+        <div class="stat-value" id="statCashBalance">£10,000.00</div>
+        <div class="stat-sub" style="color: var(--text-secondary);">
+          Ready for immediate execution
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Active Investments</span>
+          <div class="stat-icon">📊</div>
+        </div>
+        <div class="stat-value" id="statInvested">£0.00</div>
+        <div class="stat-sub" style="color: var(--text-secondary);">
+          Current market value of held shares
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Zero Commission</span>
+          <div class="stat-icon">⚡</div>
+        </div>
+        <div class="stat-value" style="color: var(--accent-green);">£0.00 Fees</div>
+        <div class="stat-sub" style="color: var(--text-secondary);">
+          Live LSE streaming quotes
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Tabs -->
+    <div class="main-tabs">
+      <button class="tab-btn active" data-tab="stocks">
+        🇬🇧 Market Watch (FTSE 100) <span class="tab-count" id="tabCountStocks">18</span>
+      </button>
+      <button class="tab-btn" data-tab="portfolio">
+        💼 My Portfolio
+      </button>
+      <button class="tab-btn" data-tab="history">
+        📜 Order History
+      </button>
+      <button class="tab-btn" data-tab="leaderboard">
+        🏆 Leaderboard
+      </button>
+    </div>
+
+    <!-- Tab 1: Stocks List -->
+    <div id="stocksTabContent">
+      <div class="controls-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="stockSearchInput" class="search-input" placeholder="Search by stock ticker or company name...">
         </div>
 
-        <!-- Buy / Sell Side Selector -->
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Order Side</label>
-          <div class="grid grid-cols-2 gap-3">
-            <label class="flex items-center justify-center p-3 rounded-xl border border-slate-700 bg-slate-900 cursor-pointer has-[:checked]:border-amber-500 has-[:checked]:bg-amber-500/10 has-[:checked]:text-amber-400">
-              <input type="radio" name="trade-side" value="BUY" checked onchange="updateTradeTerminalPreview()" class="sr-only">
-              <span class="font-extrabold text-sm">BUY (Go Long)</span>
-            </label>
-            <label class="flex items-center justify-center p-3 rounded-xl border border-slate-700 bg-slate-900 cursor-pointer has-[:checked]:border-rose-500 has-[:checked]:bg-rose-500/10 has-[:checked]:text-rose-400">
-              <input type="radio" name="trade-side" value="SELL" onchange="updateTradeTerminalPreview()" class="sr-only">
-              <span class="font-extrabold text-sm">SELL (Exit)</span>
-            </label>
-          </div>
+        <div class="sector-pills">
+          <button class="pill active" data-sector="ALL">All Sectors</button>
+          <button class="pill" data-sector="HEALTHCARE">Healthcare</button>
+          <button class="pill" data-sector="ENERGY">Energy</button>
+          <button class="pill" data-sector="FINANCIALS">Financials</button>
+          <button class="pill" data-sector="CONSUMER GOODS">Consumer Goods</button>
+          <button class="pill" data-sector="AEROSPACE & DEFENCE">Aerospace</button>
+          <button class="pill" data-sector="BASIC MATERIALS">Commodities</button>
         </div>
+      </div>
 
-        <!-- Order Mode (By Currency Amount vs Share Quantity) -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Order Quantity</label>
-            <div class="flex items-center gap-3 text-xs">
-              <label class="flex items-center gap-1 cursor-pointer">
-                <input type="radio" name="trade-mode" value="AMOUNT" checked onchange="updateTradeTerminalPreview()" class="text-amber-500">
-                <span>By Amount (£/$)</span>
-              </label>
-              <label class="flex items-center gap-1 cursor-pointer">
-                <input type="radio" name="trade-mode" value="SHARES" onchange="updateTradeTerminalPreview()" class="text-amber-500">
-                <span>By Shares</span>
-              </label>
-            </div>
-          </div>
-          <input type="number" id="trade-terminal-amount" placeholder="e.g. 500" value="500" oninput="updateTradeTerminalPreview()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-lg font-bold text-slate-100 focus:outline-none focus:border-amber-500">
-        </div>
-
-        <!-- Order Summary Box -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-2 text-xs">
-          <div class="flex justify-between text-slate-400">
-            <span>Estimated Shares:</span>
-            <span id="trade-calc-shares" class="font-bold text-slate-200">0.0000</span>
-          </div>
-          <div class="flex justify-between text-slate-400">
-            <span>Estimated Total Cost:</span>
-            <span id="trade-calc-cost" class="font-bold text-slate-200">£0.00</span>
-          </div>
-          <div class="flex justify-between text-slate-400">
-            <span>Commission Fee:</span>
-            <span class="font-bold text-emerald-400">£0.00 (Free Simulator)</span>
-          </div>
-          <div class="border-t border-slate-800 pt-2 flex justify-between text-slate-300 font-semibold">
-            <span>Available Buying Power:</span>
-            <span id="trade-calc-available" class="text-amber-400">£0.00</span>
-          </div>
-        </div>
-
-        <!-- Submit Button -->
-        <button onclick="executeTerminalTrade()" class="w-full mustard-btn-primary py-3.5 rounded-xl font-black text-slate-950 text-base shadow-lg transition">
-          Execute Order
-        </button>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Company & Symbol</th>
+              <th>Sector</th>
+              <th>Current Price</th>
+              <th>24h Change</th>
+              <th>Day Range</th>
+              <th>Trend (Today)</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="stocksTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- --------------------------------------------------------------------------
-         VIEW 5: Mustard Cup Leaderboard
-         -------------------------------------------------------------------------- -->
-    <div id="view-leaderboard" class="view-panel hidden space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-black text-slate-100 flex items-center gap-2">
-            <span>🏆 Mustard Cup Championship</span>
-          </h1>
-          <p class="text-sm text-slate-400 mt-0.5">UK Inter-school, university, and community student investing leaderboard.</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-1.5 rounded-lg">
-            Season 4 Active
-          </span>
-        </div>
-      </div>
-
-      <!-- Leaderboard List -->
-      <div class="space-y-2.5" id="leaderboard-list">
-        <!-- Dynamically populated -->
+    <!-- Tab 2: User Portfolio Holdings -->
+    <div id="portfolioTabContent" style="display: none;">
+      <div id="holdingsContainer">
+        <!-- Rendered by JavaScript -->
       </div>
     </div>
 
-    <!-- --------------------------------------------------------------------------
-         VIEW 6: Order History
-         -------------------------------------------------------------------------- -->
-    <div id="view-history" class="view-panel hidden space-y-6">
-      <div>
-        <h1 class="text-2xl font-black text-slate-100">Order History & Ledger</h1>
-        <p class="text-sm text-slate-400 mt-0.5">Complete chronological ledger of all buy and sell order executions.</p>
-      </div>
-
-      <div class="mustard-card overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-900/80 text-xs text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-3 px-4">Date / Time</th>
-                <th class="py-3 px-4">Type</th>
-                <th class="py-3 px-4">Symbol</th>
-                <th class="py-3 px-4 text-right">Quantity</th>
-                <th class="py-3 px-4 text-right">Executed Price</th>
-                <th class="py-3 px-4 text-right">Total Value</th>
-              </tr>
-            </thead>
-            <tbody id="history-table-body">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
+    <!-- Tab 3: Order History -->
+    <div id="historyTabContent" style="display: none;">
+      <div id="historyContainer">
+        <!-- Rendered by JavaScript -->
       </div>
     </div>
 
-    <!-- --------------------------------------------------------------------------
-         VIEW 7: Badges & Quests
-         -------------------------------------------------------------------------- -->
-    <div id="view-badges" class="view-panel hidden space-y-6">
-      <div>
-        <h1 class="text-2xl font-black text-slate-100">Trader Badges & Achievements</h1>
-        <p class="text-sm text-slate-400 mt-0.5">Level up your trading knowledge, earn XP, and unlock milestones as you grow your portfolio.</p>
+    <!-- Tab 4: Community Leaderboard -->
+    <div id="leaderboardTabContent" style="display: none;">
+      <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+        See how your portfolio stacks up against other traders starting with the same £10,000.00 budget.
       </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="badges-grid">
-        <!-- Dynamically populated -->
+      <div id="leaderboardContainer">
+        <!-- Rendered by JavaScript -->
       </div>
     </div>
 
   </main>
 
-  <!-- ==============================================================================
-       MODAL: Trade & Asset Inspection Modal
-       ============================================================================== -->
-  <div id="trade-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-      <button onclick="closeTradeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">✕</button>
+  <!-- ========================================================================
+       MODALS
+       ======================================================================== -->
 
-      <!-- Asset Title -->
-      <div class="flex items-start justify-between mb-2">
-        <div>
-          <div class="flex items-center gap-2.5">
-            <h2 id="modal-asset-symbol" class="text-2xl font-black text-amber-400">RR.L</h2>
-            <div id="modal-asset-price" class="text-xl font-bold text-slate-100">£5.48</div>
+  <!-- Trade Modal -->
+  <div class="modal-backdrop" id="tradeModalBackdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Order Execution</div>
+        <button class="modal-close" onclick="closeModal('tradeModalBackdrop')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="trade-mode-toggle">
+          <button class="trade-mode-btn active buy-mode" id="tradeModeBuy" onclick="setTradeMode('BUY')">BUY (Invest)</button>
+          <button class="trade-mode-btn" id="tradeModeSell" onclick="setTradeMode('SELL')">SELL (Take Out)</button>
+        </div>
+
+        <div class="trade-quote-box">
+          <div>
+            <div class="quote-sym" id="tradeModalSymbol">AZN.L</div>
+            <div class="quote-sub" id="tradeModalName">AstraZeneca PLC</div>
           </div>
-          <div id="modal-asset-name" class="text-sm text-slate-300 font-medium">Rolls-Royce Holdings plc</div>
+          <div>
+            <div class="quote-price" id="tradeModalPrice">£140.50</div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary); text-align: right;">Live LSE Price</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Tags -->
-      <div id="modal-asset-tags" class="flex flex-wrap gap-2 my-3">
-        <!-- Tags -->
-      </div>
-
-      <!-- Mini Chart -->
-      <div class="h-36 w-full my-4 bg-slate-950/60 rounded-xl p-2 border border-slate-800">
-        <canvas id="modalAssetChart"></canvas>
-      </div>
-
-      <p id="modal-asset-desc" class="text-xs text-slate-400 leading-relaxed mb-4">
-        Description
-      </p>
-
-      <!-- Buy / Sell Mode -->
-      <div class="flex gap-2 mb-4 bg-slate-950 p-1 rounded-xl border border-slate-800">
-        <button id="modal-btn-side-buy" onclick="setModalTradeSide('BUY')" class="flex-1 py-2 rounded-lg font-bold text-sm bg-amber-500 text-slate-900 shadow">
-          Buy
-        </button>
-        <button id="modal-btn-side-sell" onclick="setModalTradeSide('SELL')" class="flex-1 py-2 rounded-lg font-bold text-sm bg-slate-800 text-slate-400 hover:text-slate-200">
-          Sell
-        </button>
-      </div>
-
-      <!-- Quantity Mode Selector -->
-      <div class="flex justify-between items-center text-xs mb-2 text-slate-400">
-        <span>Order Input:</span>
-        <div class="flex gap-3">
-          <label class="cursor-pointer flex items-center gap-1">
-            <input type="radio" name="modal-mode" value="AMOUNT" checked onchange="updateModalCalc()" class="text-amber-500">
-            <span>By Cash (£/$)</span>
-          </label>
-          <label class="cursor-pointer flex items-center gap-1">
-            <input type="radio" name="modal-mode" value="SHARES" onchange="updateModalCalc()" class="text-amber-500">
-            <span>By Shares</span>
-          </label>
+        <div class="form-group">
+          <label class="form-label">Number of Shares</label>
+          <input type="number" id="tradeSharesInput" class="form-input" min="1" step="1" value="1">
+          <div class="quick-pct-chips">
+            <button class="pct-chip" onclick="setTradePercent(25)">25%</button>
+            <button class="pct-chip" onclick="setTradePercent(50)">50%</button>
+            <button class="pct-chip" onclick="setTradePercent(75)">75%</button>
+            <button class="pct-chip" onclick="setTradePercent(100)">MAX</button>
+          </div>
         </div>
-      </div>
 
-      <input type="number" id="modal-trade-input" placeholder="Enter amount or shares..." oninput="updateModalCalc()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-lg font-bold text-slate-100 focus:outline-none focus:border-amber-500 mb-4">
-
-      <!-- Summary -->
-      <div class="bg-slate-950/80 rounded-xl p-3.5 border border-slate-800 space-y-1.5 text-xs text-slate-400 mb-5">
-        <div class="flex justify-between">
-          <span>Shares To Execute:</span>
-          <span id="modal-calc-shares" class="text-slate-200 font-bold">0.0000</span>
+        <div class="trade-breakdown">
+          <div class="breakdown-row">
+            <span>Estimated Total:</span>
+            <span id="tradeTotalEstimate" style="color: #fff; font-weight: 700;">£140.50</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Brokerage Commission:</span>
+            <span style="color: var(--accent-green); font-weight: 600;">£0.00 (Free)</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Projected Cash Remaining:</span>
+            <span id="tradeRemainingCash">£9,859.50</span>
+          </div>
         </div>
-        <div class="flex justify-between">
-          <span>Total Order Cost:</span>
-          <span id="modal-calc-cost" class="text-slate-200 font-bold">£0.00</span>
+
+        <div id="tradeOwnedHelp" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          <!-- Injected dynamically -->
         </div>
-        <div class="flex justify-between">
-          <span>Your Owned Shares:</span>
-          <span id="modal-calc-owned" class="text-slate-300 font-medium">0 shares</span>
-        </div>
-        <div class="flex justify-between border-t border-slate-800 pt-1.5">
-          <span>Available Buying Power:</span>
-          <span id="modal-calc-avail" class="text-amber-400 font-bold">£0.00</span>
-        </div>
-      </div>
 
-      <button id="modal-submit-btn" onclick="submitModalTrade()" class="w-full mustard-btn-primary py-3 rounded-xl font-extrabold text-slate-950 transition">
-        Confirm Order
-      </button>
-    </div>
-  </div>
-
-  <!-- ==============================================================================
-       MODAL: Portfolio Reset Modal
-       ============================================================================== -->
-  <div id="reset-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-      <button onclick="closeResetModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">✕</button>
-      <h2 class="text-xl font-bold text-slate-100 mb-1">Reset Portfolio</h2>
-      <p class="text-xs text-slate-400 mb-4">Choose your starting virtual capital to restart your simulator portfolio.</p>
-
-      <div class="grid grid-cols-2 gap-2.5 mb-5">
-        <button onclick="confirmResetPortfolio(1000)" class="p-3 rounded-xl border border-slate-700 hover:border-amber-500 bg-slate-800 text-center transition">
-          <div class="font-extrabold text-slate-100">£1,000</div>
-          <div class="text-[11px] text-slate-400">Student Beginner</div>
-        </button>
-        <button onclick="confirmResetPortfolio(10000)" class="p-3 rounded-xl border border-slate-700 hover:border-amber-500 bg-slate-800 text-center transition">
-          <div class="font-extrabold text-slate-100">£10,000</div>
-          <div class="text-[11px] text-slate-400">Standard Class</div>
-        </button>
-        <button onclick="confirmResetPortfolio(25000)" class="p-3 rounded-xl border border-amber-500/60 bg-amber-500/10 text-center transition">
-          <div class="font-extrabold text-amber-400">£25,000</div>
-          <div class="text-[11px] text-amber-300">Mustard Default</div>
-        </button>
-        <button onclick="confirmResetPortfolio(100000)" class="p-3 rounded-xl border border-slate-700 hover:border-amber-500 bg-slate-800 text-center transition">
-          <div class="font-extrabold text-slate-100">£100,000</div>
-          <div class="text-[11px] text-slate-400">Wealth Tier</div>
-        </button>
-      </div>
-
-      <button onclick="closeResetModal()" class="w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl font-bold text-xs text-slate-300 transition">
-        Cancel
-      </button>
-    </div>
-  </div>
-
-  <!-- ==============================================================================
-       MODAL: Backup & Restore Modal
-       ============================================================================== -->
-  <div id="backup-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
-      <button onclick="closeBackupModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">✕</button>
-      <h2 class="text-xl font-bold text-slate-100 mb-1">Portfolio Backup & Sync</h2>
-      <p class="text-xs text-slate-400 mb-4">Export your simulation data as JSON or paste an existing backup to restore.</p>
-
-      <textarea id="backup-json-textarea" rows="8" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-500 mb-4"></textarea>
-
-      <div class="flex gap-2">
-        <button onclick="copyBackupToClipboard()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2.5 rounded-xl transition">
-          📋 Copy to Clipboard
-        </button>
-        <button onclick="importBackupData()" class="flex-1 mustard-btn-primary text-slate-950 text-xs font-bold py-2.5 rounded-xl transition">
-          📥 Restore Backup
+        <button class="btn btn-primary" id="tradeExecuteBtn" style="width: 100%; padding: 0.85rem;" onclick="executeTrade()">
+          Confirm Buy Order
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ==============================================================================
-       Toast Container
-       ============================================================================== -->
-  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
-
-  <!-- Footer -->
-  <footer class="border-t border-slate-800 bg-[#0B0F19] py-4 text-center text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <div>
-        Mustard Investments Replica • Built for educational paper trading & financial literacy.
+  <!-- Stock Detail Modal -->
+  <div class="modal-backdrop" id="stockDetailModalBackdrop">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="detailName">AstraZeneca PLC</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);" id="detailSymbol">AZN.L</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('stockDetailModalBackdrop')">&times;</button>
       </div>
-      <div>
-        Self-hosted open source replica • Ready for GitHub Pages & Local execution.
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.25rem;">
+          <div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #fff;" id="detailPrice">£140.50</div>
+            <div class="sector-tag" id="detailSector">Healthcare</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">Market Feed:</div>
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--mustard-400);" id="detailSource">LSE Live Delayed</div>
+          </div>
+        </div>
+
+        <div id="detailChart" style="margin-bottom: 1.25rem; background: rgba(0, 0, 0, 0.25); border-radius: var(--radius-md); padding: 0.75rem; border: 1px solid var(--border-color);">
+          <!-- Large SVG chart injected here -->
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.25rem;" id="detailDescription">
+          Biopharmaceutical company specializing in oncology, rare diseases, and vaccines.
+        </div>
+
+        <div class="trade-breakdown">
+          <div class="breakdown-row">
+            <span>24h Range:</span>
+            <span id="detailRange" style="color: #fff;">£139.60 - £141.20</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Trading Volume:</span>
+            <span id="detailVolume" style="color: #fff;">2,810,400</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('stockDetailModalBackdrop')">Close</button>
+        <button class="btn btn-primary" id="detailTradeBtn">Invest in this Stock</button>
       </div>
     </div>
-  </footer>
+  </div>
 
-  <!-- App Core JS -->
-  <script src="app.js"></script>
+  <!-- Authentication Modal (Sign In / Sign Up) -->
+  <div class="modal-backdrop" id="authModalBackdrop" data-mode="register">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="authModalTitle">Create Your Account</div>
+        <button class="modal-close" onclick="closeModal('authModalBackdrop')">&times;</button>
+      </div>
+      <form id="authForm">
+        <div class="modal-body">
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: var(--mustard-400);">
+            ✨ <strong>£10,000.00 Starting Balance:</strong> Every new private account starts with £10k in virtual capital to trade live UK equities.
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" id="authUsername" class="form-input" placeholder="e.g. london_trader" required autocomplete="username">
+          </div>
+
+          <div class="form-group" id="authEmailGroup">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="authEmail" class="form-input" placeholder="trader@example.com" autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="authPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width: 100%; padding: 0.8rem; margin-top: 0.5rem;">
+            Create Account (£10,000 Bonus)
+          </button>
+
+          <div style="text-align: center; margin-top: 1.25rem; font-size: 0.82rem; color: var(--text-secondary);">
+            <span id="authSwitchPrompt">Already have an account?</span>
+            <a href="javascript:void(0)" id="authSwitchLink" style="color: var(--mustard-400); text-decoration: underline; margin-left: 4px; font-weight: 600;">Sign In</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Script -->
+  <script src="static/js/app.js"></script>
 </body>
 </html>

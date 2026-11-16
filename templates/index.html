@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mustard Investments UK | Real-time Stock Trading Simulator</title>
+  <meta name="description" content="Trade real UK FTSE 100 stocks in real-time with £10,000 starting cash. Learn investing risk-free with private multi-user accounts.">
+  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🟡</text></svg>">
+</head>
+<body>
+
+  <!-- Live Scrolling Ticker Tape -->
+  <div class="ticker-tape">
+    <div class="ticker-track" id="tickerTrack">
+      <!-- Injected by JavaScript -->
+      <div class="ticker-item"><span class="ticker-sym">LSE</span> Loading London Market Data...</div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="brand-group" onclick="switchTab('stocks')">
+      <div class="brand-icon">📈</div>
+      <div>
+        <div class="brand-title">Mustard <span>Investments</span></div>
+      </div>
+      <span class="brand-badge">🇬🇧 UK FTSE 100</span>
+    </div>
+
+    <div class="market-status">
+      <div class="status-dot"></div>
+      <span style="font-weight: 600;">London Stock Exchange</span>
+      <span style="color: var(--text-muted); font-size: 0.75rem;">•</span>
+      <span id="marketClock" style="color: var(--mustard-400); font-weight: 700;">--:--:-- GMT</span>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Guest Navigation -->
+      <div id="guestNav" style="display: flex; gap: 0.5rem; align-items: center;">
+        <button class="btn btn-secondary btn-sm" onclick="openAuthModal('login')">Sign In</button>
+        <button class="btn btn-primary btn-sm" onclick="openAuthModal('register')">Get £10,000 Account</button>
+      </div>
+
+      <!-- Logged-in User Navigation -->
+      <div id="userNav" class="user-menu" style="display: none;">
+        <div class="avatar-circle" id="navAvatar">U</div>
+        <div class="user-meta">
+          <span class="user-name" id="navUsername">Trader</span>
+          <span class="user-cash-label">Cash: £<span id="navCash">10,000.00</span></span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="resetAccount()" title="Reset account back to £10,000">↺ Reset</button>
+        <button class="btn btn-ghost btn-sm" onclick="handleLogout()" title="Log out">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <div class="hero-text">
+        <h1>Master the UK Stock Market with <span class="hero-highlight">£10,000</span></h1>
+        <p>
+          Trade real-time London Stock Exchange equities with live market prices, isolate your private portfolio from other investors, and build your wealth risk-free.
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="switchTab('stocks')">Explore Stocks</button>
+        <button class="btn btn-secondary" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
+      </div>
+    </section>
+
+    <!-- 4 Key Portfolio Metrics -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Portfolio Value</span>
+          <div class="stat-icon">💼</div>
+        </div>
+        <div class="stat-value" id="statTotalValue">£10,000.00</div>
+        <div class="stat-sub up" id="statPnl">
+          <span>▲ £0.00 (+0.00%)</span>
+          <span style="color: var(--text-muted); font-weight: normal; margin-left: 4px;">from £10k start</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Available Cash</span>
+          <div class="stat-icon">💷</div>
+        </div>
+        <div class="stat-value" id="statCashBalance">£10,000.00</div>
+        <div class="stat-sub" style="color: var(--text-secondary);">
+          Ready for immediate execution
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Active Investments</span>
+          <div class="stat-icon">📊</div>
+        </div>
+        <div class="stat-value" id="statInvested">£0.00</div>
+        <div class="stat-sub" style="color: var(--text-secondary);">
+          Current market value of held shares
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Zero Commission</span>
+          <div class="stat-icon">⚡</div>
+        </div>
+        <div class="stat-value" style="color: var(--accent-green);">£0.00 Fees</div>
+        <div class="stat-sub" style="color: var(--text-secondary);">
+          Live LSE streaming quotes
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Tabs -->
+    <div class="main-tabs">
+      <button class="tab-btn active" data-tab="stocks">
+        🇬🇧 Market Watch (FTSE 100) <span class="tab-count" id="tabCountStocks">18</span>
+      </button>
+      <button class="tab-btn" data-tab="portfolio">
+        💼 My Portfolio
+      </button>
+      <button class="tab-btn" data-tab="history">
+        📜 Order History
+      </button>
+      <button class="tab-btn" data-tab="leaderboard">
+        🏆 Leaderboard
+      </button>
+    </div>
+
+    <!-- Tab 1: Stocks List -->
+    <div id="stocksTabContent">
+      <div class="controls-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="stockSearchInput" class="search-input" placeholder="Search by stock ticker or company name...">
+        </div>
+
+        <div class="sector-pills">
+          <button class="pill active" data-sector="ALL">All Sectors</button>
+          <button class="pill" data-sector="HEALTHCARE">Healthcare</button>
+          <button class="pill" data-sector="ENERGY">Energy</button>
+          <button class="pill" data-sector="FINANCIALS">Financials</button>
+          <button class="pill" data-sector="CONSUMER GOODS">Consumer Goods</button>
+          <button class="pill" data-sector="AEROSPACE & DEFENCE">Aerospace</button>
+          <button class="pill" data-sector="BASIC MATERIALS">Commodities</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Company & Symbol</th>
+              <th>Sector</th>
+              <th>Current Price</th>
+              <th>24h Change</th>
+              <th>Day Range</th>
+              <th>Trend (Today)</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="stocksTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: User Portfolio Holdings -->
+    <div id="portfolioTabContent" style="display: none;">
+      <div id="holdingsContainer">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Tab 3: Order History -->
+    <div id="historyTabContent" style="display: none;">
+      <div id="historyContainer">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Tab 4: Community Leaderboard -->
+    <div id="leaderboardTabContent" style="display: none;">
+      <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+        See how your portfolio stacks up against other traders starting with the same £10,000.00 budget.
+      </div>
+      <div id="leaderboardContainer">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       MODALS
+       ======================================================================== -->
+
+  <!-- Trade Modal -->
+  <div class="modal-backdrop" id="tradeModalBackdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Order Execution</div>
+        <button class="modal-close" onclick="closeModal('tradeModalBackdrop')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="trade-mode-toggle">
+          <button class="trade-mode-btn active buy-mode" id="tradeModeBuy" onclick="setTradeMode('BUY')">BUY (Invest)</button>
+          <button class="trade-mode-btn" id="tradeModeSell" onclick="setTradeMode('SELL')">SELL (Take Out)</button>
+        </div>
+
+        <div class="trade-quote-box">
+          <div>
+            <div class="quote-sym" id="tradeModalSymbol">AZN.L</div>
+            <div class="quote-sub" id="tradeModalName">AstraZeneca PLC</div>
+          </div>
+          <div>
+            <div class="quote-price" id="tradeModalPrice">£140.50</div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary); text-align: right;">Live LSE Price</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Number of Shares</label>
+          <input type="number" id="tradeSharesInput" class="form-input" min="1" step="1" value="1">
+          <div class="quick-pct-chips">
+            <button class="pct-chip" onclick="setTradePercent(25)">25%</button>
+            <button class="pct-chip" onclick="setTradePercent(50)">50%</button>
+            <button class="pct-chip" onclick="setTradePercent(75)">75%</button>
+            <button class="pct-chip" onclick="setTradePercent(100)">MAX</button>
+          </div>
+        </div>
+
+        <div class="trade-breakdown">
+          <div class="breakdown-row">
+            <span>Estimated Total:</span>
+            <span id="tradeTotalEstimate" style="color: #fff; font-weight: 700;">£140.50</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Brokerage Commission:</span>
+            <span style="color: var(--accent-green); font-weight: 600;">£0.00 (Free)</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Projected Cash Remaining:</span>
+            <span id="tradeRemainingCash">£9,859.50</span>
+          </div>
+        </div>
+
+        <div id="tradeOwnedHelp" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          <!-- Injected dynamically -->
+        </div>
+
+        <button class="btn btn-primary" id="tradeExecuteBtn" style="width: 100%; padding: 0.85rem;" onclick="executeTrade()">
+          Confirm Buy Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Detail Modal -->
+  <div class="modal-backdrop" id="stockDetailModalBackdrop">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="detailName">AstraZeneca PLC</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);" id="detailSymbol">AZN.L</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('stockDetailModalBackdrop')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.25rem;">
+          <div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #fff;" id="detailPrice">£140.50</div>
+            <div class="sector-tag" id="detailSector">Healthcare</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">Market Feed:</div>
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--mustard-400);" id="detailSource">LSE Live Delayed</div>
+          </div>
+        </div>
+
+        <div id="detailChart" style="margin-bottom: 1.25rem; background: rgba(0, 0, 0, 0.25); border-radius: var(--radius-md); padding: 0.75rem; border: 1px solid var(--border-color);">
+          <!-- Large SVG chart injected here -->
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.25rem;" id="detailDescription">
+          Biopharmaceutical company specializing in oncology, rare diseases, and vaccines.
+        </div>
+
+        <div class="trade-breakdown">
+          <div class="breakdown-row">
+            <span>24h Range:</span>
+            <span id="detailRange" style="color: #fff;">£139.60 - £141.20</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Trading Volume:</span>
+            <span id="detailVolume" style="color: #fff;">2,810,400</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('stockDetailModalBackdrop')">Close</button>
+        <button class="btn btn-primary" id="detailTradeBtn">Invest in this Stock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authentication Modal (Sign In / Sign Up) -->
+  <div class="modal-backdrop" id="authModalBackdrop" data-mode="register">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="authModalTitle">Create Your Account</div>
+        <button class="modal-close" onclick="closeModal('authModalBackdrop')">&times;</button>
+      </div>
+      <form id="authForm">
+        <div class="modal-body">
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: var(--mustard-400);">
+            ✨ <strong>£10,000.00 Starting Balance:</strong> Every new private account starts with £10k in virtual capital to trade live UK equities.
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" id="authUsername" class="form-input" placeholder="e.g. london_trader" required autocomplete="username">
+          </div>
+
+          <div class="form-group" id="authEmailGroup">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="authEmail" class="form-input" placeholder="trader@example.com" autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="authPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width: 100%; padding: 0.8rem; margin-top: 0.5rem;">
+            Create Account (£10,000 Bonus)
+          </button>
+
+          <div style="text-align: center; margin-top: 1.25rem; font-size: 0.82rem; color: var(--text-secondary);">
+            <span id="authSwitchPrompt">Already have an account?</span>
+            <a href="javascript:void(0)" id="authSwitchLink" style="color: var(--mustard-400); text-decoration: underline; margin-left: 4px; font-weight: 600;">Sign In</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Script -->
+  <script src="static/js/app.js"></script>
+</body>
+</html>

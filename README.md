@@ -1,64 +1,72 @@
-# 🟡 Mustard Investments (Live Trading Simulator)
+# 📈 UK Stock Trading & Virtual Portfolio Simulator
 
-[![Live Website](https://img.shields.io/badge/Live%20Website-Click%20Here%20to%20Open-F59E0B?style=for-the-badge&logo=googlechrome&logoColor=black)](https://gigloobg-code.github.io/mustard-investments/)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Active-10B981?style=for-the-badge&logo=github)](https://gigloobg-code.github.io/mustard-investments/)
-
-## 🌐 Live Website Link
-
-👉 **[https://gigloobg-code.github.io/mustard-investments/](https://gigloobg-code.github.io/mustard-investments/)**
-
-Open the link above in any browser on desktop, tablet, or phone to use the simulator immediately without installing anything!
+A real-time UK stock trading platform and investment simulator. Every user starts with **£10,000.00** in virtual capital to trade live London Stock Exchange (FTSE 100) equities, create private multi-user accounts, track real-time profit and loss, and manage their investments risk-free.
 
 ---
 
-## 🚀 Why This Project Exists
+## 🌐 Live Website
 
-Mustard Investments (`mustardinvestments.com`) went down due to an expired cloud deployment (`HTTP 402 Payment Required: DEPLOYMENT_DISABLED`). This replica reproduces the full trading simulator, portfolio tracker, market explorer, and competition leaderboard.
-
-As requested, all educational curriculum/lessons have been removed, giving you a clean, high-performance trading platform.
+- **GitHub Pages Link**: [https://gigloobg-code.github.io/mustard-investments/](https://gigloobg-code.github.io/mustard-investments/)
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- **💼 Virtual Portfolio & Live Dashboard:**
-  - Start with £25,000 (or customizable £1,000, £10,000, £100,000) in virtual cash.
-  - Track real-time Net Worth, Invested Capital, Cash Balance, and Daily/Total P&L (£ and %).
-  - Real-time asset allocation breakdown (Stocks, Crypto, ETFs, Cash).
-
-- **📈 Real-Time Markets & Screener:**
-  - **UK / FTSE 100:** Rolls-Royce (`RR.L`), Shell (`SHEL.L`), BP (`BP.L`), Barclays (`BARC.L`), AstraZeneca (`AZN.L`), Lloyds (`LLOY.L`), Tesco (`TSCO.L`), Vodafone (`VOD.L`), NatWest (`NWG.L`), HSBC (`HSBA.L`), Ocado (`OCDO.L`).
-  - **US Tech Leaders:** Apple (`AAPL`), Microsoft (`MSFT`), Nvidia (`NVDA`), Tesla (`TSLA`), Google (`GOOGL`), Amazon (`AMZN`).
-  - **Crypto:** Bitcoin (`BTC`), Ethereum (`ETH`), Solana (`SOL`).
-  - **ETFs & Indices:** S&P 500 (`VUSA`), FTSE 100 (`ISF`).
-  - Live price fluctuation simulation engine with realistic price trends.
-  - Interactive price charts with timeframe toggles (1D, 1W, 1M, 1Y, ALL).
-
-- **⚡ Order Execution Terminal:**
-  - Market & Limit order simulation.
-  - Buy & Sell in Shares or direct £ / $ currency amounts (with fractional shares).
-  - Instant order fulfillment with zero commission fees.
-
-- **🌱 Faith & Values Alignment Screener:**
-  - Filter investments by **Halal / Shariah Compliant**, **ESG Green**, and **Ethical / Faith-Aligned** badges.
-
-- **🏆 Mustard Cup Leaderboard:**
-  - Inter-school and community championship simulator ranking top student and team portfolios.
-
-- **🎯 Gamification & Achievements:**
-  - XP progression, daily trading streaks, and unlockable badges.
-
-- **💾 LocalStorage & Portability:**
-  - Zero external database required — all portfolio holdings and transactions persist locally in your browser.
-  - Built-in **Export / Import JSON** backup.
-  - One-click currency switch between **GBP (£)** and **USD ($)**.
+- **💷 £10,000.00 Initial Capital**: Every newly created account begins with ten thousand pounds in virtual cash.
+- **🔒 Multi-User Private Accounts**: Supports multiple independent accounts. Each investor's cash balance, holdings, and transaction history are completely private.
+- **🇬🇧 Live Real-Time UK Equities**: Tracks major UK stocks listed on the London Stock Exchange (FTSE 100), including AstraZeneca (`AZN.L`), Shell (`SHEL.L`), HSBC (`HSBA.L`), Unilever (`ULVR.L`), BP (`BP.L`), Rolls-Royce (`RR.L`), BAE Systems (`BA.L`), Barclays (`BARC.L`), Tesco (`TSCO.L`), and more.
+- **📈 Real-Time Profit & Loss (P&L)**:
+  - Dynamically updates portfolio valuation as share prices change.
+  - Computes unrealized gains and losses on current holdings.
+  - Computes realized gains and losses when shares are sold ("taking money out").
+- **⚡ Trading Execution Engine**:
+  - Instant Buy and Sell orders with percentage calculation shortcuts (`25%`, `50%`, `75%`, `MAX`).
+  - Zero-commission simulation.
+- **📊 Interactive Charts & Sparklines**: Intraday trend charts, 24-hour price ranges, and volume data for every stock.
+- **🏆 Community Leaderboard**: Compare total portfolio return with other registered investors.
+- **🚀 Dual Deployment Architecture**:
+  - **Full-Stack Mode**: Flask backend with SQLite database for persistent multi-device accounts.
+  - **Static GitHub Pages Mode**: In-browser local account engine with zero setup required.
 
 ---
 
-## 🏃 Offline / Local Execution
+## 💻 Local Setup & Running
 
-1. Double-click [**`Launch Mustard.bat`**](Launch%20Mustard.bat) or open [**`index.html`**](index.html) directly in any browser.
-2. Or run via PowerShell:
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File .\serve.ps1
-   ```
+### Requirements
+- Python 3.10+
+- `pip`
+
+### Quick Start
+```bash
+# Clone the repository
+git clone https://github.com/gigloobg-code/mustard-investments.git
+cd mustard-investments
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the application
+python app.py
+```
+
+Then visit `http://127.0.0.1:5000` in your web browser.
+
+---
+
+## ☁️ Cloud Deployment Options
+
+### 1. GitHub Pages (Static Mode)
+This repository includes an automated GitHub Actions deployment workflow in `.github/workflows/deploy.yml`. When you push to the `main` branch, the site deploys automatically to GitHub Pages.
+
+### 2. Render / Railway / Docker (Full-Stack Multi-User Backend)
+- **Render**: Connect the repository and select Web Service. The included `render.yaml` automatically sets up Python and Gunicorn.
+- **Docker**: Build and run using the included `Dockerfile`:
+  ```bash
+  docker build -t uk-stock-simulator .
+  docker run -p 5000:5000 uk-stock-simulator
+  ```
+
+---
+
+## 📄 License
+MIT License. Created for educational and paper trading simulation purposes.
